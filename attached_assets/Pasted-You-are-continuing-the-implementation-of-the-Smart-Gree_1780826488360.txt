@@ -1,0 +1,273 @@
+You are continuing the implementation of the Smart Greenhouse IoT System.
+
+Act according to the following roles:
+1. Senior QA / Test Engineer
+2. System Architect
+3. Senior Backend Developer
+4. Product Manager
+5. Security Analyst
+
+Current Project Status:
+Prompt 1 created the initial Flask project structure, JSON data files, services, models, basic dashboard, /api/health, and /api/sensors.
+
+Goal of Prompt 2:
+Implement the first real IoT data flow:
+
+Virtual Sensor Reading → REST API → Validation → Storage → Latest Readings → Dashboard Update
+
+Do NOT implement alerts, automation, authentication, analytics, or role-based permissions yet.
+Focus only on sensor reading ingestion, validation, storage, latest reading retrieval, and dashboard display.
+
+Main Requirements to Implement:
+
+1. Sensor Reading Submission API
+
+Create the endpoint:
+
+POST /api/sensors/<sensor_id>/reading
+
+The endpoint should accept JSON payloads with:
+
+{
+  "sensor_id": "TEMP-001",
+  "sensor_type": "temperature",
+  "value": 31.5,
+  "unit": "C",
+  "timestamp": "2026-05-11T10:30:00Z"
+}
+
+Rules:
+- The sensor_id in the URL must match the sensor_id in the request body.
+- The sensor must exist in sensors.json.
+- The sensor_type must match the configured sensor type.
+- The value must be numeric.
+- The unit must match the configured unit.
+- The timestamp must exist and be valid.
+- Invalid readings must be rejected.
+- Invalid readings must NOT be saved in readings.json.
+- Invalid readings must be written to system_logs.json.
+
+2. Validation Service
+
+Implement validation_service.py with clear functions:
+
+- validate_sensor_exists(sensor_id)
+- validate_sensor_type(sensor_id, sensor_type)
+- validate_numeric_value(value)
+- validate_unit(sensor_id, unit)
+- validate_timestamp(timestamp)
+- validate_sensor_reading(sensor_id, payload)
+
+The validation function should return a structured result:
+
+{
+  "is_valid": true/false,
+  "errors": []
+}
+
+Security requirement:
+Never trust client input.
+Validate every field before saving.
+
+3. Reading Storage
+
+Update storage_service.py and sensor_service.py so valid readings are saved into data/readings.json.
+
+Each saved reading should include:
+
+- reading_id
+- sensor_id
+- sensor_type
+- value
+- unit
+- timestamp
+- reading_status
+- created_at
+
+For now, reading_status can be:
+- "received"
+
+Do not calculate normal/warning/critical yet.
+That will be implemented later in the Rule Engine prompt.
+
+4. Latest Readings API
+
+Create the endpoint:
+
+GET /api/readings/latest
+
+It should return the latest valid reading for each of the four sensors:
+- temperature
+- humidity
+- soil moisture
+- light intensity
+
+If a sensor has no reading yet, return a clear empty state for that sensor.
+
+5. Sensor Reading History API
+
+Create the endpoint:
+
+GET /api/sensors/<sensor_id>/readings
+
+It should return all valid readings for the selected sensor, ordered from newest to oldest.
+
+Rules:
+- Only valid readings from readings.json should appear.
+- Rejected readings must not appear here.
+- If the sensor does not exist, return a safe 404 response.
+
+6. System Logs for Rejected Readings
+
+Update log_service.py so every rejected reading creates a system log entry.
+
+Each log should include:
+- log_id
+- event_type
+- description
+- sensor_id if available
+- rejection_reason
+- original_payload when safe
+- created_at
+
+Supported event_type examples:
+- invalid_sensor_reading
+- unknown_sensor_id
+- invalid_sensor_type
+- invalid_unit
+- non_numeric_value
+- invalid_timestamp
+- sensor_id_mismatch
+
+7. Dashboard Update
+
+Update index.html and dashboard.js so the dashboard displays:
+
+For each sensor card:
+- Sensor name
+- Sensor type
+- Latest value
+- Unit
+- Last update time
+- Reading availability status
+
+If no reading exists:
+Show:
+"No reading received yet"
+
+Add a simple refresh button:
+"Refresh Sensor Data"
+
+When clicked, it should call:
+
+GET /api/readings/latest
+
+and update the dashboard.
+
+8. Optional Demo Buttons
+
+Add simple demo buttons to generate valid readings manually from the frontend:
+
+- Generate Temperature Reading
+- Generate Humidity Reading
+- Generate Soil Moisture Reading
+- Generate Light Reading
+
+Each button should send a valid sample reading to:
+POST /api/sensors/<sensor_id>/reading
+
+This is only for testing the flow manually.
+
+Do not create automatic simulation loops yet.
+Sensor polling frequency will be implemented later.
+
+9. Error Handling
+
+Return safe and clear JSON errors.
+
+Examples:
+
+{
+  "success": false,
+  "message": "Invalid sensor reading",
+  "errors": ["Value must be numeric"]
+}
+
+Do not expose stack traces or internal file paths.
+
+10. QA Requirements
+
+After implementation, verify:
+
+1. Flask app still runs successfully.
+2. GET /api/health works.
+3. GET /api/sensors returns exactly four sensors.
+4. POST /api/sensors/TEMP-001/reading accepts a valid temperature reading.
+5. POST /api/sensors/TEMP-001/reading rejects a wrong unit.
+6. POST /api/sensors/TEMP-001/reading rejects a non-numeric value.
+7. POST /api/sensors/UNKNOWN/reading rejects an unknown sensor.
+8. Rejected readings are saved only in system_logs.json.
+9. Valid readings are saved in readings.json.
+10. GET /api/readings/latest returns latest readings.
+11. GET /api/sensors/<sensor_id>/readings returns history for that sensor.
+12. Dashboard displays latest sensor values correctly.
+13. Dashboard shows a clear empty state if no reading exists.
+14. No alert or automation action is created yet.
+
+Restrictions:
+- Do not implement Rule Engine status evaluation yet.
+- Do not implement normal/warning/critical yet.
+- Do not implement alerts yet.
+- Do not implement automation yet.
+- Do not implement authentication yet.
+- Do not use SQLite yet.
+- Keep JSON storage.
+- Do not remove the modular service structure.
+- Do not rewrite the entire project.
+- Only extend the existing code from Prompt 1.
+
+At the end of your response, provide:
+
+1. Summary of files created or modified.
+2. Available APIs after this prompt.
+3. Example valid sensor reading request.
+4. Example invalid sensor reading request.
+5. QA checklist results.
+6. Requirements Coverage Status.
+
+Requirements Coverage Status:
+
+Total project requirements to track:
+- 48 Functional Requirements
+- 13 Non-Functional Requirements
+- Total: 61 requirements
+
+Requirements targeted in this prompt:
+
+Fully implemented or mostly implemented:
+- FR-01: Current temperature reading foundation
+- FR-02: Current humidity reading foundation
+- FR-03: Current soil moisture reading foundation
+- FR-04: Current light intensity reading foundation
+- FR-06: View received sensor data structure through API
+- FR-09: Temperature reading history foundation
+- FR-10: Humidity reading history foundation
+- FR-11: Soil moisture reading history foundation
+- FR-12: Light intensity reading history foundation
+- FR-13: Last update time foundation
+- NFR-11: Incoming sensor readings validation foundation
+
+Partially prepared:
+- FR-05: Sensor status display is prepared, but normal/warning/critical will be added later by the Rule Engine.
+- FR-07: Sensor activity tracking is not fully implemented yet.
+- FR-32: Dashboard continues to be prepared with latest readings.
+
+Covered so far:
+- Fully / mostly implemented: 11 / 61 requirements
+- Partially prepared: 3 / 61 requirements
+
+Still not covered:
+- 47 / 61 requirements
+
+Important:
+Do not mark alerts, automation, analytics, role permissions, or threshold management as completed yet.

@@ -1,0 +1,26 @@
+[
+  {
+    "user_id": "USR-001",
+    "full_name": "Greenhouse Manager",
+    "email": "manager@greenhouse.local",
+    "role": "manager",
+    "account_status": "active",
+    "created_at": "2026-06-07T00:00:00Z"
+  },
+  {
+    "user_id": "USR-002",
+    "full_name": "Farm Owner",
+    "email": "owner@greenhouse.local",
+    "role": "owner",
+    "account_status": "active",
+    "created_at": "2026-06-07T00:00:00Z"
+  },
+  {
+    "user_id": "USR-003",
+    "full_name": "System Administrator",
+    "email": "admin@greenhouse.local",
+    "role": "administrator",
+    "account_status": "active",
+    "created_at": "2026-06-07T00:00:00Z"
+  }
+]

@@ -1,0 +1,375 @@
+You are continuing the implementation of the Smart Greenhouse IoT System.
+
+Act according to the following roles:
+1. Senior QA / Test Engineer
+2. System Architect
+3. Senior Backend Developer
+4. Product Manager
+5. Security Analyst
+
+Current Project Status:
+Prompt 1 created the project foundation.
+Prompt 2 implemented sensor reading ingestion, validation, storage, latest readings, reading history, and rejected reading logs.
+Prompt 3 implemented Rule Engine and threshold evaluation.
+Prompt 4 implemented alerts, recommended actions, active alerts, alert history, and alert resolution.
+Prompt 5 implemented simulated automation responses and automation history.
+Prompt 6 implemented threshold management.
+Prompt 7 implemented sensor management and sensor activity monitoring.
+Prompt 8 implemented dashboard analytics and Greenhouse Health Score.
+Prompt 9 implemented predefined simulation scenarios.
+
+Goal of Prompt 10:
+Implement user access and role-based permissions for the three project roles:
+1. Greenhouse Manager
+2. Farm Owner
+3. System Administrator
+
+Main Flow for this prompt:
+User Role → Permission Check → Allowed Action / Blocked Action → Safe Response → System Log
+
+Do NOT implement advanced production authentication.
+Do NOT implement password login yet unless already simple in the project.
+For this academic MVP, implement demo role-based access using request headers.
+
+Use this request header:
+X-User-Role
+
+Supported values:
+- greenhouse_manager
+- farm_owner
+- system_administrator
+
+Main Requirements to Implement:
+
+1. Access Control Service
+
+Create or update:
+
+services/access_control_service.py
+
+Implement clean functions:
+
+- get_role_from_request(request)
+- normalize_role(role)
+- is_valid_role(role)
+- has_permission(role, action)
+- require_permission(role, action)
+- get_allowed_actions_for_role(role)
+- log_unauthorized_attempt(role, action, endpoint)
+
+2. Define Role Permissions
+
+Greenhouse Manager permissions:
+Allowed:
+- view_dashboard
+- view_current_readings
+- view_active_alerts
+- resolve_alerts
+- view_reading_history
+- view_alert_history
+- view_automation_status
+- view_automation_history
+- run_simulation_scenarios
+- view_sensor_status
+
+Blocked:
+- update_thresholds
+- update_sensor_configuration
+- view_admin_logs
+- manage_users
+
+Farm Owner permissions:
+Allowed:
+- view_farm_owner_summary
+- view_greenhouse_health_status
+- view_greenhouse_health_score
+- view_basic_analytics
+- view_most_frequent_abnormal_condition
+
+Blocked:
+- resolve_alerts
+- run_simulation_scenarios
+- update_thresholds
+- update_sensor_configuration
+- view_admin_logs
+- reset_actuators
+
+System Administrator permissions:
+Allowed:
+- view_dashboard
+- view_current_readings
+- view_sensor_status
+- update_sensor_configuration
+- update_thresholds
+- view_admin_logs
+- view_rejected_readings
+- view_system_logs
+- check_sensor_activity
+- reset_actuators
+- view_threshold_history
+
+Blocked:
+- none for MVP maintenance actions, unless action is unrelated to the project.
+
+3. Protect Existing APIs
+
+Update relevant API endpoints to check permissions using X-User-Role.
+
+Examples:
+
+Dashboard/read-only APIs:
+- GET /api/sensors
+- GET /api/readings/latest
+- GET /api/alerts/active
+- GET /api/analytics/summary
+
+Threshold update:
+- PUT /api/thresholds/<sensor_type>
+Allowed only for:
+- system_administrator
+
+Sensor configuration update:
+- PUT /api/sensors/<sensor_id>
+Allowed only for:
+- system_administrator
+
+Resolve alert:
+- PATCH /api/alerts/<alert_id>/resolve
+Allowed only for:
+- greenhouse_manager
+
+Run simulation:
+- POST /api/simulation/run/<scenario_id>
+Allowed only for:
+- greenhouse_manager
+
+Check sensor activity:
+- POST /api/sensors/check-activity
+Allowed only for:
+- system_administrator
+
+Reset actuator:
+- PATCH /api/actuators/<actuator_id>/reset
+Allowed only for:
+- system_administrator
+
+System logs:
+Create if missing:
+
+GET /api/logs
+
+Allowed only for:
+- system_administrator
+
+4. Replace Demo Role in Body
+
+Previous prompts may have used role in request body for admin actions.
+
+Update the system so role should now come from:
+
+X-User-Role
+
+Do not rely on role from JSON body anymore for protected actions.
+
+If both exist:
+- ignore role from body
+- use X-User-Role only
+
+5. Safe Unauthorized Response
+
+For unauthorized actions return:
+
+HTTP 403
+
+{
+  "success": false,
+  "message": "You are not authorized to perform this action"
+}
+
+For missing or invalid role return:
+
+HTTP 401 or 403
+
+{
+  "success": false,
+  "message": "Missing or invalid user role"
+}
+
+6. System Logs for Security Events
+
+Log every unauthorized access attempt.
+
+Each log should include:
+- log_id
+- event_type
+- description
+- role
+- attempted_action
+- endpoint
+- created_at
+
+event_type:
+- unauthorized_access_attempt
+- invalid_role_attempt
+
+7. Frontend Demo Role Switcher
+
+Update:
+- templates/index.html
+- static/js/dashboard.js
+- static/css/style.css
+
+Add a simple demo role selector at the top of the dashboard:
+
+Select Role:
+- Greenhouse Manager
+- Farm Owner
+- System Administrator
+
+The selected role should be sent in every fetch request as:
+
+X-User-Role: selectedRole
+
+UI behavior:
+- Greenhouse Manager should see monitoring, alerts, automation, history, and simulation controls.
+- Farm Owner should see high-level health and analytics summary only.
+- System Administrator should see threshold management, sensor management, logs, and system controls.
+
+This is demo UI visibility only.
+Backend permission checks are mandatory and must be the source of truth.
+
+8. Farm Owner Summary View
+
+Ensure Farm Owner can access:
+- greenhouse health status
+- greenhouse health score
+- average values
+- alert counts
+- most frequent abnormal condition
+
+Farm Owner must not be able to:
+- resolve alerts
+- run simulations
+- update thresholds
+- edit sensors
+- reset actuators
+
+9. Greenhouse Manager View
+
+Ensure Greenhouse Manager can:
+- view current readings
+- view active alerts
+- resolve alerts
+- view automation status
+- view histories
+- run predefined simulation scenarios
+
+Greenhouse Manager must not be able to:
+- update thresholds
+- edit sensor configuration
+- view admin logs
+
+10. System Administrator View
+
+Ensure System Administrator can:
+- update thresholds
+- manage sensor configuration
+- check sensor activity
+- view invalid/rejected reading logs
+- view system logs
+- reset actuators
+
+System Administrator should not need to resolve daily greenhouse alerts in this MVP unless already allowed by the project design.
+
+11. Security Requirements
+
+- Never trust frontend-only UI hiding.
+- Enforce permissions on the backend.
+- Do not use request body role for authorization.
+- Use X-User-Role header for this MVP.
+- Validate the role on every protected request.
+- Log unauthorized access attempts.
+- Do not expose stack traces.
+- Do not expose internal file paths.
+- Return safe error messages.
+
+12. QA Requirements
+
+After implementation, verify:
+
+1. Flask app runs successfully.
+2. Existing APIs from Prompts 1–9 still work when called with allowed role.
+3. Missing X-User-Role is rejected for protected APIs.
+4. Invalid X-User-Role is rejected.
+5. Greenhouse Manager can view dashboard data.
+6. Greenhouse Manager can resolve alerts.
+7. Greenhouse Manager can run simulation scenarios.
+8. Greenhouse Manager cannot update thresholds.
+9. Greenhouse Manager cannot update sensor configuration.
+10. Farm Owner can view analytics summary.
+11. Farm Owner can view Greenhouse Health Score.
+12. Farm Owner cannot resolve alerts.
+13. Farm Owner cannot run simulation scenarios.
+14. Farm Owner cannot update thresholds.
+15. Farm Owner cannot edit sensors.
+16. System Administrator can update thresholds.
+17. System Administrator can update sensor configuration.
+18. System Administrator can check sensor activity.
+19. System Administrator can reset actuators.
+20. System Administrator can view system logs.
+21. Unauthorized attempts are logged in system_logs.json.
+22. Frontend role selector sends X-User-Role in requests.
+23. UI changes according to selected role.
+24. Backend still blocks forbidden actions even if a user manually calls the API.
+
+Restrictions:
+- Do not implement production login.
+- Do not implement password authentication.
+- Do not implement JWT unless already planned later.
+- Do not use SQLite yet.
+- Keep JSON storage.
+- Do not rewrite the entire project.
+- Only extend the existing code.
+- Keep the MVP academic and simple.
+
+At the end of your response, provide:
+
+1. Summary of files created or modified.
+2. Available APIs after this prompt.
+3. Role permission matrix.
+4. Example allowed request.
+5. Example unauthorized request.
+6. QA checklist results.
+7. Requirements Coverage Status.
+
+Requirements Coverage Status:
+
+Total project requirements to track:
+- 48 Functional Requirements
+- 13 Non-Functional Requirements
+- Total: 61 requirements
+
+Requirements targeted in this prompt:
+
+Fully / mostly implemented:
+- FR-45: Greenhouse Manager access to monitoring, alerts, automation status, history, and simulation scenarios
+- FR-46: Farm Owner access to health status, analytics summary, and Greenhouse Health Score
+- FR-47: System Administrator access to threshold configuration, sensor management, invalid reading logs, and system logs
+- FR-48: Restricted administrative actions available only to authorized administrator users
+- NFR-10: Only authorized administrators can change sensor threshold values
+
+Partially strengthened:
+- NFR-11: Sensor readings remain validated before processing
+- NFR-08: Role logic is separated into access_control_service.py
+- NFR-06: Dashboard clarity is improved by role-based sections
+
+Covered so far:
+- Fully / mostly implemented: 61 / 61 requirements
+- Partially prepared: 0 / 61 requirements
+
+Still not fully covered:
+- 0 / 61 requirements
+
+Important:
+Although all 61 requirements are now functionally covered at MVP level, final QA and NFR verification are still required in the next prompt.
+Do not claim the system is production-ready.

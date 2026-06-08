@@ -1,0 +1,258 @@
+You are continuing the implementation of the Smart Greenhouse IoT System.
+
+Act according to the following roles:
+1. Senior QA / Test Engineer
+2. System Architect
+3. Senior Backend Developer
+4. Product Manager
+5. Security Analyst
+
+Current Project Status:
+Prompt 1 created the project foundation.
+Prompt 2 implemented sensor reading ingestion, validation, storage, latest readings, reading history, rejected reading logs, and dashboard display.
+Prompt 3 implemented Rule Engine and threshold evaluation.
+Prompt 4 implemented alerts, recommended actions, active alerts, alert history, and alert resolution.
+Prompt 5 implemented simulated automation responses, actuators, automation history, and actuator reset.
+
+Goal of Prompt 6:
+Implement Threshold Management for System Administrator.
+
+Main Flow for this prompt:
+System Administrator → View Threshold Rules → Update Min/Max Values → Validate Thresholds → Save Updated Rule → Log Threshold Change → Apply Rule to Future Readings
+
+Do NOT implement full authentication yet.
+Do NOT implement advanced role-based login yet.
+For now, use a simple role parameter or demo admin mode to protect threshold update actions.
+Full user access and role permissions will be implemented in a later prompt.
+
+Main Requirements to Implement:
+
+1. Threshold Management APIs
+
+The following APIs should already exist from Prompt 3:
+
+GET /api/thresholds
+GET /api/thresholds/<sensor_type>
+
+Keep them working.
+
+Add:
+
+PUT /api/thresholds/<sensor_type>
+
+Request body example:
+
+{
+  "min_value": 18,
+  "max_value": 30,
+  "warning_margin": 2,
+  "role": "system_administrator"
+}
+
+Rules:
+- Only role = "system_administrator" is allowed to update thresholds in this stage.
+- If role is missing or not system_administrator, reject the request safely.
+- sensor_type must be one of:
+  - temperature
+  - humidity
+  - soil_moisture
+  - light_intensity
+- min_value must be numeric.
+- max_value must be numeric.
+- warning_margin must be numeric and greater than or equal to 0.
+- min_value must be lower than max_value.
+- Save only the rule that belongs to the selected sensor_type.
+- Do not affect other threshold rules.
+
+2. Threshold Service
+
+Create or update a dedicated service file if needed:
+
+services/threshold_service.py
+
+Implement clean functions:
+
+- get_all_thresholds()
+- get_threshold_by_sensor_type(sensor_type)
+- update_threshold_rule(sensor_type, min_value, max_value, warning_margin, role)
+- validate_threshold_update(sensor_type, min_value, max_value, warning_margin, role)
+- create_threshold_change_log(sensor_type, old_rule, new_rule, role)
+
+Keep threshold logic separate from app.py as much as possible.
+
+3. Apply Updated Thresholds to Future Readings
+
+After a threshold rule is updated:
+- Future sensor readings must use the new threshold values.
+- Existing historical readings do not need to be recalculated.
+- Existing alerts do not need to be recalculated.
+- The Rule Engine should always read the current threshold rule from data/threshold_rules.json.
+
+4. Threshold Change Logs
+
+Every successful threshold update must create a system log entry.
+
+Log fields:
+- log_id
+- event_type
+- description
+- sensor_type
+- old_min_value
+- old_max_value
+- old_warning_margin
+- new_min_value
+- new_max_value
+- new_warning_margin
+- role
+- created_at
+
+event_type:
+- threshold_rule_updated
+
+Failed update attempts should also be logged.
+
+Examples:
+- unauthorized_threshold_update_attempt
+- invalid_threshold_update_attempt
+
+5. Dashboard Threshold Management Section
+
+Update index.html, style.css, and dashboard.js.
+
+Add a simple Threshold Management section.
+
+For each sensor type, display:
+- sensor_type
+- min_value
+- max_value
+- warning_margin
+- unit
+
+Add simple input fields to update:
+- min_value
+- max_value
+- warning_margin
+
+Add an update button.
+
+For this stage, send role = "system_administrator" from the frontend request as demo admin mode.
+
+Important:
+This is temporary for the MVP.
+Full authentication and role-based permission will be implemented later.
+
+6. Safe Error Handling
+
+Return safe JSON errors.
+
+Examples:
+
+Unauthorized role:
+
+{
+  "success": false,
+  "message": "Only system administrators can update threshold rules"
+}
+
+Invalid values:
+
+{
+  "success": false,
+  "message": "Invalid threshold update",
+  "errors": ["min_value must be lower than max_value"]
+}
+
+Unknown sensor type:
+
+{
+  "success": false,
+  "message": "Unsupported sensor type"
+}
+
+7. Security Requirements
+
+- Do not allow threshold updates without checking the role.
+- Do not trust frontend values.
+- Validate all numeric fields on the backend.
+- Validate sensor_type on the backend.
+- Do not expose stack traces or internal file paths.
+- Log unauthorized threshold update attempts.
+- Keep the current implementation simple, but prepare it for real role-based permissions later.
+
+8. QA Requirements
+
+After implementation, verify:
+
+1. Flask app runs successfully.
+2. Existing APIs from Prompts 1–5 still work.
+3. GET /api/thresholds returns all threshold rules.
+4. GET /api/thresholds/temperature returns the temperature threshold rule.
+5. PUT /api/thresholds/temperature updates the temperature threshold as system_administrator.
+6. PUT /api/thresholds/humidity updates only the humidity threshold and does not change other rules.
+7. PUT rejects unsupported sensor_type.
+8. PUT rejects missing role.
+9. PUT rejects role that is not system_administrator.
+10. PUT rejects non-numeric min_value.
+11. PUT rejects non-numeric max_value.
+12. PUT rejects warning_margin below 0.
+13. PUT rejects min_value greater than or equal to max_value.
+14. Successful threshold update is logged in system_logs.json.
+15. Failed threshold update attempt is logged in system_logs.json.
+16. New sensor readings use the updated threshold values.
+17. Existing historical readings are not recalculated.
+18. Dashboard displays threshold rules.
+19. Dashboard allows demo admin threshold update.
+20. No full authentication is implemented yet.
+
+Restrictions:
+- Do not implement full login/authentication yet.
+- Do not implement complete role-based access system yet.
+- Do not use SQLite yet.
+- Keep JSON storage.
+- Do not recalculate old readings.
+- Do not rewrite the entire project.
+- Only extend the existing code.
+
+At the end of your response, provide:
+
+1. Summary of files created or modified.
+2. Available APIs after this prompt.
+3. Example successful threshold update request.
+4. Example unauthorized threshold update request.
+5. Example invalid threshold update request.
+6. QA checklist results.
+7. Requirements Coverage Status.
+
+Requirements Coverage Status:
+
+Total project requirements to track:
+- 48 Functional Requirements
+- 13 Non-Functional Requirements
+- Total: 61 requirements
+
+Requirements targeted in this prompt:
+
+Fully / mostly implemented:
+- FR-14: Define and update temperature threshold values
+- FR-15: Define and update humidity threshold values
+- FR-16: Define and update soil moisture threshold values
+- FR-17: Define and update light intensity threshold values
+- FR-18: Update threshold values for a specific sensor type
+- FR-42: View/log threshold configuration changes foundation
+- NFR-10: Only authorized administrator role can update thresholds, demo-level protection for now
+
+Partially strengthened:
+- FR-05: Sensor status now depends on configurable threshold rules
+- FR-23: Alert severity continues to depend on updated threshold rules
+- FR-47: Administrator threshold configuration access is prepared
+- FR-48: Restricted administrative actions are partially enforced for threshold updates
+
+Covered so far:
+- Fully / mostly implemented: 43 / 61 requirements
+- Partially prepared: 6 / 61 requirements
+
+Still not fully covered:
+- 18 / 61 requirements
+
+Important:
+Do not mark full authentication, complete role-based permissions, advanced analytics, simulation scenarios, sensor management editing, or full NFR testing as fully completed yet.

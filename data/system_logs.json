@@ -1,0 +1,221 @@
+[
+  {
+    "log_id": "LOG-23d533e8da81",
+    "event_type": "analytics_summary_generated",
+    "description": "Dashboard analytics summary generated",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": null,
+    "created_at": "2026-06-07T12:25:11.598697+00:00"
+  },
+  {
+    "log_id": "LOG-38deef28e640",
+    "event_type": "analytics_summary_generated",
+    "description": "Dashboard analytics summary generated",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": null,
+    "created_at": "2026-06-07T12:25:14.991143+00:00"
+  },
+  {
+    "log_id": "LOG-f47a60fa3caa",
+    "event_type": "analytics_summary_generated",
+    "description": "Dashboard analytics summary generated",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": null,
+    "created_at": "2026-06-07T12:25:18.361704+00:00"
+  },
+  {
+    "log_id": "LOG-a24749f2e6c1",
+    "event_type": "unauthorized_access_attempt",
+    "description": "Unauthorized action 'view_current_readings' attempted by role 'farm_owner'",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": {
+      "role": "farm_owner",
+      "attempted_action": "view_current_readings",
+      "endpoint": "/api/readings/latest"
+    },
+    "created_at": "2026-06-07T12:25:20.204098+00:00"
+  },
+  {
+    "log_id": "LOG-a95080fb22d9",
+    "event_type": "unauthorized_access_attempt",
+    "description": "Unauthorized action 'view_current_readings' attempted by role 'farm_owner'",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": {
+      "role": "farm_owner",
+      "attempted_action": "view_current_readings",
+      "endpoint": "/api/readings/latest"
+    },
+    "created_at": "2026-06-07T12:25:21.124871+00:00"
+  },
+  {
+    "log_id": "LOG-3a13f570059a",
+    "event_type": "unauthorized_access_attempt",
+    "description": "Unauthorized action 'view_current_readings' attempted by role 'farm_owner'",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": {
+      "role": "farm_owner",
+      "attempted_action": "view_current_readings",
+      "endpoint": "/api/readings/latest"
+    },
+    "created_at": "2026-06-07T12:25:21.674845+00:00"
+  },
+  {
+    "log_id": "LOG-ee705db515fc",
+    "event_type": "unauthorized_access_attempt",
+    "description": "Unauthorized action 'view_current_readings' attempted by role 'farm_owner'",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": {
+      "role": "farm_owner",
+      "attempted_action": "view_current_readings",
+      "endpoint": "/api/readings/latest"
+    },
+    "created_at": "2026-06-07T12:25:22.454258+00:00"
+  },
+  {
+    "log_id": "LOG-5465b20942c7",
+    "event_type": "analytics_summary_generated",
+    "description": "Dashboard analytics summary generated",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": null,
+    "created_at": "2026-06-07T12:25:24.176232+00:00"
+  },
+  {
+    "log_id": "LOG-c4d72bc90549",
+    "event_type": "simulation_scenario_started",
+    "description": "Simulation scenario started: hot_day",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": {
+      "scenario_id": "hot_day"
+    },
+    "created_at": "2026-06-07T12:25:37.233154+00:00"
+  },
+  {
+    "log_id": "LOG-87da0ff01061",
+    "event_type": "alert_generated",
+    "description": "critical alert generated (temperature_too_high)",
+    "sensor_id": "TEMP-001",
+    "sensor_type": null,
+    "alert_id": "ALERT-b784cba5d686",
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": null,
+    "created_at": "2026-06-07T12:25:37.234244+00:00"
+  },
+  {
+    "log_id": "LOG-724169a91e84",
+    "event_type": "actuator_status_changed",
+    "description": "Actuator status changed to active: Greenhouse Temperature Sensor reading 35C exceeded the maximum threshold of 30C.",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": "ACT-VENT-001",
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": null,
+    "created_at": "2026-06-07T12:25:37.235083+00:00"
+  },
+  {
+    "log_id": "LOG-14c7b363e8e5",
+    "event_type": "automation_triggered",
+    "description": "Automation response triggered (activate_ventilation)",
+    "sensor_id": "TEMP-001",
+    "sensor_type": null,
+    "alert_id": "ALERT-b784cba5d686",
+    "actuator_id": "ACT-VENT-001",
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": null,
+    "created_at": "2026-06-07T12:25:37.235862+00:00"
+  },
+  {
+    "log_id": "LOG-274016369bca",
+    "event_type": "simulation_scenario_completed",
+    "description": "Simulation scenario completed: hot_day",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": {
+      "scenario_id": "hot_day"
+    },
+    "created_at": "2026-06-07T12:25:37.236266+00:00"
+  },
+  {
+    "log_id": "LOG-c621c1a0c323",
+    "event_type": "unauthorized_access_attempt",
+    "description": "Unauthorized action 'view_basic_analytics' attempted by role 'greenhouse_manager'",
+    "sensor_id": null,
+    "sensor_type": null,
+    "alert_id": null,
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": {
+      "role": "greenhouse_manager",
+      "attempted_action": "view_basic_analytics",
+      "endpoint": "/api/analytics/summary"
+    },
+    "created_at": "2026-06-07T12:25:37.359556+00:00"
+  },
+  {
+    "log_id": "LOG-d55841e06dbc",
+    "event_type": "alert_resolved",
+    "description": "Alert marked as resolved",
+    "sensor_id": "TEMP-001",
+    "sensor_type": null,
+    "alert_id": "ALERT-b784cba5d686",
+    "actuator_id": null,
+    "rejection_reason": null,
+    "original_payload": null,
+    "details": null,
+    "created_at": "2026-06-07T12:26:58.772146+00:00"
+  }
+]

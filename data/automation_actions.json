@@ -1,0 +1,16 @@
+[
+  {
+    "action_id": "ACTION-c67932360c89",
+    "actuator_id": "ACT-VENT-001",
+    "actuator_type": "ventilation",
+    "actuator_name": "Ventilation Fan",
+    "related_alert_id": "ALERT-b784cba5d686",
+    "related_sensor_id": "TEMP-001",
+    "action_type": "activate_ventilation",
+    "action_status": "active",
+    "trigger_reason": "Greenhouse Temperature Sensor reading 35C exceeded the maximum threshold of 30C.",
+    "triggered_at": "2026-06-07T12:25:37.235658+00:00",
+    "source": "simulation_scenario",
+    "scenario_id": "hot_day"
+  }
+]

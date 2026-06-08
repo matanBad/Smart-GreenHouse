@@ -1,0 +1,74 @@
+[
+  {
+    "reading_id": "READ-4ad8eb00c295",
+    "sensor_id": "TEMP-001",
+    "sensor_type": "temperature",
+    "value": 20.1,
+    "unit": "C",
+    "timestamp": "2026-06-07T12:25:19.509Z",
+    "reading_status": "normal",
+    "created_at": "2026-06-07T12:25:20.090777+00:00",
+    "source": null,
+    "scenario_id": null
+  },
+  {
+    "reading_id": "READ-94bb7d5b1981",
+    "sensor_id": "HUM-001",
+    "sensor_type": "humidity",
+    "value": 57.5,
+    "unit": "%",
+    "timestamp": "2026-06-07T12:25:20.431Z",
+    "reading_status": "normal",
+    "created_at": "2026-06-07T12:25:21.004770+00:00",
+    "source": null,
+    "scenario_id": null
+  },
+  {
+    "reading_id": "READ-bcfabbf40cb7",
+    "sensor_id": "SOIL-001",
+    "sensor_type": "soil_moisture",
+    "value": 48.1,
+    "unit": "%",
+    "timestamp": "2026-06-07T12:25:20.985Z",
+    "reading_status": "normal",
+    "created_at": "2026-06-07T12:25:21.559987+00:00",
+    "source": null,
+    "scenario_id": null
+  },
+  {
+    "reading_id": "READ-11f41eb92904",
+    "sensor_id": "LIGHT-001",
+    "sensor_type": "light_intensity",
+    "value": 5112.2,
+    "unit": "lux",
+    "timestamp": "2026-06-07T12:25:21.759Z",
+    "reading_status": "normal",
+    "created_at": "2026-06-07T12:25:22.339736+00:00",
+    "source": null,
+    "scenario_id": null
+  },
+  {
+    "reading_id": "READ-8b59494183df",
+    "sensor_id": "TEMP-001",
+    "sensor_type": "temperature",
+    "value": 35,
+    "unit": "C",
+    "timestamp": "2026-06-07T12:25:37.233707+00:00",
+    "reading_status": "critical",
+    "created_at": "2026-06-07T12:25:37.233834+00:00",
+    "source": "simulation_scenario",
+    "scenario_id": "hot_day"
+  },
+  {
+    "reading_id": "READ-295ca15c15c2",
+    "sensor_id": "TEMP-001",
+    "sensor_type": "temperature",
+    "value": 24.6,
+    "unit": "C",
+    "timestamp": "2026-06-08T09:23:44.400Z",
+    "reading_status": "normal",
+    "created_at": "2026-06-08T09:23:44.405150+00:00",
+    "source": null,
+    "scenario_id": null
+  }
+]

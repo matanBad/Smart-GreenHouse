@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Greenhouse IoT System</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-mark">GH</span>
+        <div>
+          <h1>Smart Greenhouse IoT System</h1>
+          <p class="subtitle">Real-time monitoring &amp; automation dashboard</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <label class="role-switcher">
+          <span class="role-switcher-label">Viewing as</span>
+          <select id="role-select">
+            <option value="greenhouse_manager">Greenhouse Manager</option>
+            <option value="farm_owner">Farm Owner</option>
+            <option value="system_administrator">System Administrator</option>
+          </select>
+        </label>
+        <span id="health-pill" class="health-pill">Connecting…</span>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Toolbar -->
+      <section class="toolbar" data-roles="greenhouse_manager system_administrator">
+        <button id="refresh-btn" class="btn btn-primary">
+          Refresh Dashboard
+        </button>
+        <div class="demo-buttons" data-roles="greenhouse_manager">
+          <span class="demo-label">Demo readings:</span>
+          <button class="btn btn-ghost" data-sensor="TEMP-001">
+            Generate Temperature Reading
+          </button>
+          <button class="btn btn-ghost" data-sensor="HUM-001">
+            Generate Humidity Reading
+          </button>
+          <button class="btn btn-ghost" data-sensor="SOIL-001">
+            Generate Soil Moisture Reading
+          </button>
+          <button class="btn btn-ghost" data-sensor="LIGHT-001">
+            Generate Light Reading
+          </button>
+        </div>
+      </section>
+
+      <!-- Live sensors -->
+      <section data-roles="greenhouse_manager system_administrator">
+        <h2 class="section-title">Sensors</h2>
+        <div id="sensor-grid" class="sensor-grid">
+          <p class="loading">Loading sensors…</p>
+        </div>
+      </section>
+
+      <!-- Sensor management -->
+      <section data-roles="system_administrator">
+        <div class="alerts-head">
+          <h2 class="section-title">Sensor Management</h2>
+          <div class="head-actions">
+            <span class="admin-tag">Demo admin mode</span>
+            <button id="check-activity-btn" class="btn btn-ghost">
+              Check Sensor Activity
+            </button>
+          </div>
+        </div>
+        <p class="section-note">
+          Monitor each sensor's communication status and edit its name or
+          enabled/disabled state. Configuration changes are validated and logged.
+        </p>
+        <div id="sensor-status-list" class="sensor-status-list">
+          <p class="loading">Loading sensor status…</p>
+        </div>
+      </section>
+
+      <!-- Active alerts -->
+      <section data-roles="greenhouse_manager">
+        <div class="alerts-head">
+          <h2 class="section-title">Active Alerts</h2>
+          <button id="refresh-alerts-btn" class="btn btn-ghost">
+            Refresh Alerts
+          </button>
+        </div>
+        <div id="alerts-list" class="alerts-list">
+          <p class="loading">Loading alerts…</p>
+        </div>
+      </section>
+
+      <!-- Automation status -->
+      <section data-roles="greenhouse_manager system_administrator">
+        <div class="alerts-head">
+          <h2 class="section-title">Automation Status</h2>
+          <button id="refresh-automation-btn" class="btn btn-ghost">
+            Refresh Automation Status
+          </button>
+        </div>
+        <div id="actuators-list" class="actuators-list">
+          <p class="loading">Loading actuators…</p>
+        </div>
+      </section>
+
+      <!-- Automation history -->
+      <section data-roles="greenhouse_manager system_administrator">
+        <h2 class="section-title">Automation History</h2>
+        <div id="automation-history" class="automation-history">
+          <p class="loading">Loading automation history…</p>
+        </div>
+      </section>
+
+      <!-- Simulation scenarios -->
+      <section data-roles="greenhouse_manager">
+        <div class="alerts-head">
+          <h2 class="section-title">Simulation Scenarios</h2>
+          <span class="admin-tag">Predefined</span>
+        </div>
+        <p class="section-note">
+          Run a predefined scenario (e.g. Hot Day, Dry Soil). The backend
+          generates controlled readings relative to the current thresholds and
+          runs them through the normal pipeline — so alerts, automation, and
+          analytics all update just like real readings.
+        </p>
+        <div id="scenario-list" class="scenario-list">
+          <p class="loading">Loading scenarios…</p>
+        </div>
+        <div id="scenario-result" class="scenario-result"></div>
+      </section>
+
+      <!-- Threshold management -->
+      <section data-roles="system_administrator">
+        <div class="alerts-head">
+          <h2 class="section-title">Threshold Management</h2>
+          <span class="admin-tag">Demo admin mode</span>
+        </div>
+        <p class="section-note">
+          Edit the min/max range and warning margin for each sensor type. Changes
+          apply to future readings only.
+        </p>
+        <div id="thresholds-list" class="thresholds-list">
+          <p class="loading">Loading threshold rules…</p>
+        </div>
+      </section>
+
+      <!-- Farm Owner high-level summary -->
+      <section data-roles="farm_owner">
+        <div class="alerts-head">
+          <h2 class="section-title">Farm Owner Summary</h2>
+          <span class="admin-tag">Farm owner view</span>
+        </div>
+        <p class="section-note">
+          A high-level snapshot of the greenhouse: overall health, score, and the
+          most frequent issue. For the full breakdown see Dashboard Analytics below.
+        </p>
+        <div id="owner-summary" class="owner-summary">
+          <p class="loading">Loading summary…</p>
+        </div>
+      </section>
+
+      <!-- Dashboard analytics -->
+      <section data-roles="farm_owner">
+        <div class="alerts-head">
+          <h2 class="section-title">Dashboard Analytics</h2>
+          <button id="refresh-analytics-btn" class="btn btn-ghost">
+            Refresh Analytics
+          </button>
+        </div>
+        <p class="section-note">
+          Averages, alert counts, trends, and the greenhouse health score — all
+          calculated on the server from valid readings and current sensor state.
+        </p>
+        <div id="analytics-body" class="analytics-body">
+          <p class="loading">Loading analytics…</p>
+        </div>
+      </section>
+
+      <!-- System logs (System Administrator) -->
+      <section data-roles="system_administrator">
+        <div class="alerts-head">
+          <h2 class="section-title">System Logs</h2>
+          <button id="refresh-logs-btn" class="btn btn-ghost">
+            Refresh Logs
+          </button>
+        </div>
+        <p class="section-note">
+          The audit trail recorded by the backend — rejected readings,
+          configuration changes, automation events, and role-based access
+          denials (unauthorized or invalid-role attempts). Newest first.
+        </p>
+        <div id="logs-body" class="logs-body">
+          <p class="loading">Loading system logs…</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Smart Greenhouse IoT System · Academic MVP</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  </body>
+</html>

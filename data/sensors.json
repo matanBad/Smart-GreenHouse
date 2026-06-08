@@ -1,0 +1,58 @@
+[
+  {
+    "sensor_id": "TEMP-001",
+    "greenhouse_id": "GH-001",
+    "sensor_type": "temperature",
+    "sensor_name": "Greenhouse Temperature Sensor",
+    "unit": "C",
+    "location": "Zone A",
+    "status": "enabled",
+    "expected_frequency_seconds": 5,
+    "last_valid_reading_at": "2026-06-08T09:23:44.408153+00:00",
+    "communication_status": "active",
+    "created_at": "2026-06-07T00:00:00+00:00",
+    "updated_at": "2026-06-07T00:00:00+00:00"
+  },
+  {
+    "sensor_id": "HUM-001",
+    "greenhouse_id": "GH-001",
+    "sensor_type": "humidity",
+    "sensor_name": "Air Humidity Sensor",
+    "unit": "%",
+    "location": "Zone A",
+    "status": "enabled",
+    "expected_frequency_seconds": 5,
+    "last_valid_reading_at": "2026-06-07T12:25:21.005021+00:00",
+    "communication_status": "active",
+    "created_at": "2026-06-07T00:00:00+00:00",
+    "updated_at": "2026-06-07T00:00:00+00:00"
+  },
+  {
+    "sensor_id": "SOIL-001",
+    "greenhouse_id": "GH-001",
+    "sensor_type": "soil_moisture",
+    "sensor_name": "Soil Moisture Sensor",
+    "unit": "%",
+    "location": "Bed 1",
+    "status": "enabled",
+    "expected_frequency_seconds": 10,
+    "last_valid_reading_at": "2026-06-07T12:25:21.560229+00:00",
+    "communication_status": "active",
+    "created_at": "2026-06-07T00:00:00+00:00",
+    "updated_at": "2026-06-07T00:00:00+00:00"
+  },
+  {
+    "sensor_id": "LIGHT-001",
+    "greenhouse_id": "GH-001",
+    "sensor_type": "light_intensity",
+    "sensor_name": "Light Intensity Sensor",
+    "unit": "lux",
+    "location": "Zone A",
+    "status": "enabled",
+    "expected_frequency_seconds": 5,
+    "last_valid_reading_at": "2026-06-07T12:25:22.339993+00:00",
+    "communication_status": "active",
+    "created_at": "2026-06-07T00:00:00+00:00",
+    "updated_at": "2026-06-07T00:00:00+00:00"
+  }
+]

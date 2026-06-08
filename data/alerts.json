@@ -1,0 +1,22 @@
+[
+  {
+    "alert_id": "ALERT-b784cba5d686",
+    "sensor_id": "TEMP-001",
+    "reading_id": "READ-8b59494183df",
+    "sensor_type": "temperature",
+    "sensor_name": "Greenhouse Temperature Sensor",
+    "alert_type": "temperature_too_high",
+    "severity": "critical",
+    "measured_value": 35,
+    "unit": "C",
+    "min_threshold": 18,
+    "max_threshold": 30,
+    "message": "Greenhouse Temperature Sensor reading 35C exceeded the maximum threshold of 30C.",
+    "recommended_action": "Check ventilation status and monitor greenhouse heat level.",
+    "status": "resolved",
+    "created_at": "2026-06-07T12:25:37.234125+00:00",
+    "resolved_at": "2026-06-07T12:26:58.771855+00:00",
+    "source": "simulation_scenario",
+    "scenario_id": "hot_day"
+  }
+]

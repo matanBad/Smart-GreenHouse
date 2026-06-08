@@ -1,0 +1,340 @@
+You are continuing the implementation of the Smart Greenhouse IoT System.
+
+Act according to the following roles:
+1. Senior QA / Test Engineer
+2. System Architect
+3. Senior Backend Developer
+4. Product Manager
+5. Security Analyst
+
+Current Project Status:
+Prompt 1 created the project foundation.
+Prompt 2 implemented sensor reading ingestion, validation, storage, latest readings, reading history, rejected reading logs, and dashboard display.
+Prompt 3 implemented the Rule Engine and threshold evaluation with reading_status:
+- normal
+- warning
+- critical
+
+Goal of Prompt 4:
+Implement Alerts and Recommended Actions.
+
+Main Flow for this prompt:
+Valid Sensor Reading → Threshold Evaluation → Warning/Critical Detection → Alert Creation → Alert Storage → Active Alerts Dashboard
+
+Do NOT implement simulated automation yet.
+Do NOT implement threshold editing yet.
+Do NOT implement user authentication yet.
+Focus only on alerts, active alerts, alert history, alert resolution, and recommended actions.
+
+Main Requirements to Implement:
+
+1. Alert Creation Logic
+
+Update alert_service.py.
+
+Create alert generation logic for readings with status:
+- warning
+- critical
+
+Rules:
+- A normal reading must NOT create an alert.
+- A warning reading should create a warning alert.
+- A critical reading should create a critical alert.
+- Invalid or rejected readings must NOT create alerts.
+- Each alert must be connected to the sensor reading that caused it.
+
+Each alert should include:
+- alert_id
+- sensor_id
+- reading_id
+- sensor_type
+- sensor_name
+- alert_type
+- severity
+- measured_value
+- unit
+- min_threshold
+- max_threshold
+- message
+- recommended_action
+- status
+- created_at
+- resolved_at
+
+Default alert status:
+- active
+
+2. Alert Types
+
+Define alert types according to sensor type and threshold direction.
+
+Examples:
+- temperature_too_high
+- temperature_too_low
+- humidity_too_high
+- humidity_too_low
+- soil_moisture_too_low
+- soil_moisture_too_high
+- light_intensity_too_low
+- light_intensity_too_high
+
+Important:
+Even if the MVP mainly reacts automatically to high temperature, low soil moisture, low light, and high humidity, the alert layer should still support both below-minimum and above-maximum threshold violations when relevant.
+
+3. Recommended Actions
+
+Create a function in alert_service.py:
+
+get_recommended_action(sensor_type, alert_type, severity)
+
+Recommended action examples:
+- High temperature:
+  "Check ventilation status and monitor greenhouse heat level."
+- Low temperature:
+  "Review heating needs or check cold-condition protection."
+- High humidity:
+  "Check air circulation response and monitor humidity levels."
+- Low humidity:
+  "Monitor air moisture and review greenhouse humidity conditions."
+- Low soil moisture:
+  "Monitor irrigation response and check soil dryness."
+- High soil moisture:
+  "Review watering schedule and check for over-irrigation."
+- Low light:
+  "Check artificial lighting response and monitor light exposure."
+- High light:
+  "Review shading or light exposure conditions."
+
+Each generated alert must include a recommended_action.
+
+4. Update Sensor Reading POST Flow
+
+Update:
+
+POST /api/sensors/<sensor_id>/reading
+
+After:
+- validation passes
+- reading_status is calculated
+- reading is saved
+
+Then:
+- if reading_status is warning or critical, create an alert
+- save the alert in data/alerts.json
+- return the saved reading and alert information in the response
+
+Example response for warning/critical:
+
+{
+  "success": true,
+  "message": "Sensor reading saved and alert generated",
+  "reading": {...},
+  "alert": {...}
+}
+
+Example response for normal:
+
+{
+  "success": true,
+  "message": "Sensor reading saved successfully",
+  "reading": {...},
+  "alert": null
+}
+
+5. Active Alerts API
+
+Create:
+
+GET /api/alerts/active
+
+Returns only alerts where:
+status = active
+
+Rules:
+- Active alerts should be ordered by severity first:
+  critical before warning
+- Then by created_at newest to oldest
+
+6. Alert History API
+
+Create:
+
+GET /api/alerts/history
+
+Returns all alerts:
+- active
+- resolved
+
+Ordered by created_at newest to oldest.
+
+7. Sensor-Specific Alerts API
+
+Create:
+
+GET /api/sensors/<sensor_id>/alerts
+
+Returns all alerts related to a specific sensor.
+
+If the sensor does not exist, return a safe 404 response.
+
+8. Resolve Alert API
+
+Create:
+
+PATCH /api/alerts/<alert_id>/resolve
+
+Behavior:
+- Find the alert by alert_id.
+- If the alert does not exist, return 404.
+- If the alert is already resolved, return a safe response.
+- If active, set:
+  status = resolved
+  resolved_at = current timestamp
+
+Resolved alerts:
+- must disappear from active alerts
+- must remain in alert history
+
+9. Dashboard Update
+
+Update index.html, style.css, and dashboard.js.
+
+The dashboard should now include:
+
+Active Alerts Section:
+For each active alert, display:
+- sensor_name
+- alert_type
+- severity
+- measured_value + unit
+- allowed range
+- created_at
+- message
+- recommended_action
+- resolve button
+
+Behavior:
+- Critical alerts should appear before warning alerts.
+- If no active alerts exist, show:
+  "No active alerts"
+
+Add a simple "Refresh Alerts" button.
+
+The resolve button should call:
+PATCH /api/alerts/<alert_id>/resolve
+
+After resolving:
+- refresh active alerts
+- keep alert in alert history API
+
+10. System Logs
+
+Create a system log when:
+- an alert is generated
+- an alert is resolved
+- resolving an unknown alert is attempted
+
+Log fields:
+- log_id
+- event_type
+- description
+- alert_id if available
+- sensor_id if available
+- created_at
+
+event_type examples:
+- alert_generated
+- alert_resolved
+- alert_resolve_failed
+
+11. Security Requirements
+
+- Do not allow the client to create alerts directly.
+- Alerts must only be created by backend logic after threshold evaluation.
+- Do not trust client-provided severity.
+- The backend must calculate severity from reading_status.
+- Resolve endpoint should only change status and resolved_at.
+- Return safe error messages.
+- Do not expose stack traces or internal file paths.
+
+12. QA Requirements
+
+After implementation, verify:
+
+1. Flask app runs successfully.
+2. Existing APIs from Prompts 1–3 still work.
+3. Normal reading does not create an alert.
+4. Warning reading creates a warning alert.
+5. Critical reading creates a critical alert.
+6. Invalid reading does not create an alert.
+7. Every alert includes sensor name, measured value, allowed range, severity, detection time, message, and recommended action.
+8. GET /api/alerts/active returns only active alerts.
+9. GET /api/alerts/history returns active and resolved alerts.
+10. GET /api/sensors/<sensor_id>/alerts returns alerts for one sensor.
+11. PATCH /api/alerts/<alert_id>/resolve resolves an active alert.
+12. Resolved alerts disappear from active alerts.
+13. Resolved alerts remain in alert history.
+14. Dashboard displays active alerts correctly.
+15. Dashboard resolve button works.
+16. Critical alerts are shown before warning alerts.
+17. Alert generation and resolution are logged in system_logs.json.
+18. No automation action is created yet.
+
+Restrictions:
+- Do not implement automation responses yet.
+- Do not implement threshold editing yet.
+- Do not implement user authentication yet.
+- Do not use SQLite yet.
+- Keep JSON storage.
+- Do not allow direct frontend alert creation.
+- Do not rewrite the entire project.
+- Only extend the existing code.
+
+At the end of your response, provide:
+
+1. Summary of files modified.
+2. Available APIs after this prompt.
+3. Example normal reading response.
+4. Example warning alert response.
+5. Example critical alert response.
+6. Example resolve alert request.
+7. QA checklist results.
+8. Requirements Coverage Status.
+
+Requirements Coverage Status:
+
+Total project requirements to track:
+- 48 Functional Requirements
+- 13 Non-Functional Requirements
+- Total: 61 requirements
+
+Requirements targeted in this prompt:
+
+Fully / mostly implemented:
+- FR-19: Temperature alerts
+- FR-20: Humidity alerts
+- FR-21: Soil moisture alerts
+- FR-22: Light intensity alerts
+- FR-23: Alert severity level
+- FR-24: Alert details include sensor name, measured value, allowed range, and detection time
+- FR-25: Mark active alert as resolved
+- FR-26: Recommended action for each alert
+- FR-34: Active alerts displayed on dashboard
+- FR-39: Alert history foundation
+- NFR-07: Alert messages include clear details
+
+Partially prepared:
+- FR-27 to FR-30: Critical alerts now exist and can trigger automation later, but automation is not implemented yet.
+- FR-40: Automation history not implemented yet.
+- FR-45: Greenhouse Manager alert access is prepared, but role permissions are not implemented yet.
+- FR-48: Restricted actions not implemented yet.
+
+Covered so far:
+- Fully / mostly implemented: 30 / 61 requirements
+- Partially prepared: 8 / 61 requirements
+
+Still not fully covered:
+- 31 / 61 requirements
+
+Important:
+Do not mark automation, analytics, role permissions, authentication, or threshold editing as fully completed yet.

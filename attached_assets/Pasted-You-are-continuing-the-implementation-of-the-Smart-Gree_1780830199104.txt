@@ -1,0 +1,342 @@
+You are continuing the implementation of the Smart Greenhouse IoT System.
+
+Act according to the following roles:
+1. Senior QA / Test Engineer
+2. System Architect
+3. Senior Backend Developer
+4. Product Manager
+5. Security Analyst
+
+Current Project Status:
+Prompt 1 created the project foundation.
+Prompt 2 implemented sensor reading ingestion, validation, storage, latest readings, reading history, rejected reading logs, and dashboard display.
+Prompt 3 implemented Rule Engine and threshold evaluation.
+Prompt 4 implemented alerts, recommended actions, active alerts, alert history, and alert resolution.
+Prompt 5 implemented simulated automation responses, actuators, automation history, and actuator reset.
+Prompt 6 implemented threshold management with demo administrator role protection.
+
+Goal of Prompt 7:
+Implement Sensor Management and Sensor Activity Monitoring.
+
+Main Flow for this prompt:
+Sensor Configuration → Latest Valid Reading Timestamp → Activity Rule Check → Active/Inactive Sensor Status → Logs → Dashboard Display
+
+Do NOT implement full authentication yet.
+Do NOT implement advanced analytics yet.
+Do NOT implement simulation scenarios yet.
+Focus only on sensor management, active/inactive detection, stale data handling, and sensor-related logs.
+
+Main Requirements to Implement:
+
+1. Sensor Data Structure Update
+
+Update data/sensors.json if needed.
+
+Each sensor should include:
+
+- sensor_id
+- greenhouse_id
+- sensor_type
+- sensor_name
+- unit
+- status
+- expected_frequency_seconds
+- last_valid_reading_at
+- communication_status
+- created_at
+- updated_at
+
+Supported sensor types:
+- temperature
+- humidity
+- soil_moisture
+- light_intensity
+
+Default expected frequencies:
+- temperature: 5 seconds
+- humidity: 5 seconds
+- soil_moisture: 10 seconds
+- light_intensity: 5 seconds
+
+communication_status values:
+- active
+- inactive
+- no_data
+
+2. Sensor Management APIs
+
+Keep existing APIs working:
+
+GET /api/sensors
+GET /api/sensors/<id> if already exists
+
+Add or update:
+
+GET /api/sensors/status
+
+Returns all sensors with:
+- sensor_id
+- sensor_name
+- sensor_type
+- unit
+- last_valid_reading_at
+- expected_frequency_seconds
+- communication_status
+- current reading if available
+
+PUT /api/sensors/<sensor_id>
+
+Allows demo administrator update of sensor configuration.
+
+Request body example:
+
+{
+  "sensor_name": "Main Temperature Sensor",
+  "unit": "C",
+  "status": "enabled",
+  "role": "system_administrator"
+}
+
+Rules:
+- Only role = "system_administrator" can update sensor configuration in this stage.
+- sensor_id cannot be changed.
+- sensor_type cannot be changed.
+- sensor_name can be updated.
+- unit can be updated only if valid for that sensor type.
+- status can be updated only to supported values:
+  - enabled
+  - disabled
+- Invalid updates must be rejected safely.
+- Successful configuration changes must be logged.
+
+3. Sensor Service Update
+
+Update sensor_service.py.
+
+Implement clean functions:
+
+- get_all_sensors()
+- get_sensor_by_id(sensor_id)
+- update_sensor_configuration(sensor_id, update_data, role)
+- validate_sensor_update(sensor_id, update_data, role)
+- update_sensor_last_valid_reading(sensor_id, timestamp)
+- calculate_sensor_activity_status(sensor)
+- get_all_sensor_statuses()
+- mark_sensor_inactive_if_stale(sensor)
+
+Activity logic:
+- If a sensor has no last_valid_reading_at, communication_status = no_data.
+- If current time - last_valid_reading_at <= expected_frequency_seconds * 2, communication_status = active.
+- If current time - last_valid_reading_at > expected_frequency_seconds * 2, communication_status = inactive.
+
+4. Update Reading Submission Flow
+
+Update:
+
+POST /api/sensors/<sensor_id>/reading
+
+After a reading passes validation and is saved:
+- update the sensor last_valid_reading_at
+- recalculate communication_status
+- save the updated sensor object in sensors.json
+
+Invalid or rejected readings:
+- must NOT update last_valid_reading_at
+- must NOT set communication_status to active
+
+5. Stale Sensor Check API
+
+Create:
+
+POST /api/sensors/check-activity
+
+Behavior:
+- Review all configured sensors.
+- Recalculate communication_status for each sensor.
+- If a sensor becomes inactive, create a system log.
+- Return updated statuses for all sensors.
+
+This endpoint is useful for manual QA and Replit demonstration.
+
+6. System Logs
+
+Create system log entries when:
+
+- sensor configuration is updated
+- unauthorized sensor update is attempted
+- invalid sensor update is attempted
+- sensor becomes inactive
+- sensor has no data yet during activity check
+
+Log fields:
+- log_id
+- event_type
+- description
+- sensor_id
+- sensor_type
+- old_value if relevant
+- new_value if relevant
+- role if relevant
+- created_at
+
+event_type examples:
+- sensor_configuration_updated
+- unauthorized_sensor_update_attempt
+- invalid_sensor_update_attempt
+- sensor_became_inactive
+- sensor_no_data
+
+7. Dashboard Update
+
+Update index.html, style.css, and dashboard.js.
+
+Add Sensor Management / Sensor Status section.
+
+For each sensor, display:
+- sensor_name
+- sensor_id
+- sensor_type
+- unit
+- expected_frequency_seconds
+- last_valid_reading_at
+- communication_status: active / inactive / no_data
+
+Add a button:
+"Check Sensor Activity"
+
+It should call:
+
+POST /api/sensors/check-activity
+
+Then refresh sensor statuses.
+
+Add a simple demo admin edit option for sensor_name and status.
+
+For this stage, send:
+role = "system_administrator"
+
+Important:
+This is temporary demo role handling.
+Full authentication and role-based permissions will be implemented later.
+
+8. Safe Error Handling
+
+Return safe JSON errors.
+
+Examples:
+
+Unauthorized:
+
+{
+  "success": false,
+  "message": "Only system administrators can update sensor configuration"
+}
+
+Invalid unit:
+
+{
+  "success": false,
+  "message": "Invalid sensor update",
+  "errors": ["Unit does not match sensor type"]
+}
+
+Unknown sensor:
+
+{
+  "success": false,
+  "message": "Sensor not found"
+}
+
+9. Security Requirements
+
+- Do not allow sensor_id changes.
+- Do not allow sensor_type changes.
+- Do not trust frontend role blindly in the long term; keep this as temporary demo protection.
+- Validate all editable fields on the backend.
+- Reject unsupported units.
+- Reject unsupported statuses.
+- Do not expose stack traces or internal file paths.
+- Log unauthorized configuration attempts.
+
+10. QA Requirements
+
+After implementation, verify:
+
+1. Flask app runs successfully.
+2. Existing APIs from Prompts 1–6 still work.
+3. GET /api/sensors returns four sensors.
+4. GET /api/sensors/status returns all sensors with communication_status.
+5. Sensor with no readings shows communication_status = no_data.
+6. Valid reading updates last_valid_reading_at.
+7. Valid reading can set communication_status to active.
+8. Invalid reading does not update last_valid_reading_at.
+9. Invalid reading does not set sensor to active.
+10. POST /api/sensors/check-activity recalculates all sensor statuses.
+11. Sensor becomes inactive when last_valid_reading_at is too old.
+12. Sensor inactive event is logged in system_logs.json.
+13. PUT /api/sensors/<sensor_id> updates sensor_name as system_administrator.
+14. PUT /api/sensors/<sensor_id> rejects missing role.
+15. PUT /api/sensors/<sensor_id> rejects non-admin role.
+16. PUT /api/sensors/<sensor_id> rejects changing sensor_id.
+17. PUT /api/sensors/<sensor_id> rejects changing sensor_type.
+18. PUT /api/sensors/<sensor_id> rejects invalid unit.
+19. PUT /api/sensors/<sensor_id> rejects invalid status.
+20. Successful sensor configuration update is logged.
+21. Dashboard displays sensor communication status.
+22. Dashboard activity check button works.
+
+Restrictions:
+- Do not implement full login/authentication yet.
+- Do not implement complete role-based permissions yet.
+- Do not implement advanced analytics yet.
+- Do not implement simulation scenarios yet.
+- Do not use SQLite yet.
+- Keep JSON storage.
+- Do not rewrite the entire project.
+- Only extend the existing code.
+
+At the end of your response, provide:
+
+1. Summary of files created or modified.
+2. Available APIs after this prompt.
+3. Example successful sensor configuration update request.
+4. Example unauthorized sensor configuration update request.
+5. Example sensor activity check response.
+6. QA checklist results.
+7. Requirements Coverage Status.
+
+Requirements Coverage Status:
+
+Total project requirements to track:
+- 48 Functional Requirements
+- 13 Non-Functional Requirements
+- Total: 61 requirements
+
+Requirements targeted in this prompt:
+
+Fully / mostly implemented:
+- FR-07: Sensor activity and active/inactive communication status
+- FR-08: Manage virtual sensor details such as name, unit, and status
+- FR-41: Invalid, missing, stale, and sensor activity events in logs
+- FR-43: Rejected invalid sensor readings remain separated from valid history and are visible through logs foundation
+- NFR-05: Dashboard continues displaying available sensor data when one sensor becomes inactive
+- NFR-09: New virtual sensors can be supported through structured sensor configuration foundation
+- NFR-12: System design supports adding more virtual sensors in the future
+- NFR-13: System supports readings from multiple sensors without changing the main architecture
+
+Partially strengthened:
+- FR-06: Administrator can inspect received/configured sensor data
+- FR-13: Last update time now supports stale-data detection
+- FR-32: Dashboard now includes communication status
+- FR-47: Administrator sensor management access is prepared
+- FR-48: Restricted administrative actions are partially enforced for sensor updates
+
+Covered so far:
+- Fully / mostly implemented: 51 / 61 requirements
+- Partially prepared: 5 / 61 requirements
+
+Still not fully covered:
+- 10 / 61 requirements
+
+Important:
+Do not mark full authentication, complete role-based permissions, dashboard analytics, Greenhouse Health Score, simulation scenarios, or full NFR validation as fully completed yet.

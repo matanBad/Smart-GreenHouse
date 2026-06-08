@@ -1,0 +1,310 @@
+You are continuing the implementation of the Smart Greenhouse IoT System.
+
+Act according to the following roles:
+1. Senior QA / Test Engineer
+2. System Architect
+3. Senior Backend Developer
+4. Product Manager
+5. Security Analyst
+
+Current Project Status:
+Prompt 1 created the project foundation.
+Prompt 2 implemented sensor reading ingestion, validation, storage, latest readings, reading history, rejected reading logs, and dashboard display.
+Prompt 3 implemented Rule Engine and threshold evaluation.
+Prompt 4 implemented alerts, recommended actions, active alerts, alert history, and alert resolution.
+Prompt 5 implemented simulated automation responses and automation history.
+Prompt 6 implemented threshold management.
+Prompt 7 implemented sensor management and sensor activity monitoring.
+Prompt 8 implemented dashboard analytics and Greenhouse Health Score.
+
+Goal of Prompt 9:
+Implement predefined simulation scenarios.
+
+Main Flow for this prompt:
+Scenario Selection → Generate Controlled Sensor Readings → Send Through Existing Reading Flow → Validation → Rule Engine → Alerts → Automation → Storage → Dashboard Update
+
+Important:
+Scenario readings must NOT bypass the real system logic.
+They must use the same backend processing flow as normal sensor readings.
+
+Supported Scenarios:
+1. Hot Day
+2. Dry Soil
+3. High Humidity
+4. Low Light
+
+Main Requirements to Implement:
+
+1. Create Simulation Service
+
+Create or update:
+
+services/simulation_service.py
+
+Implement clean functions:
+
+- get_available_scenarios()
+- get_scenario_by_id(scenario_id)
+- generate_scenario_readings(scenario_id)
+- run_simulation_scenario(scenario_id)
+- build_scenario_result(scenario_id, readings, alerts, automation_actions)
+
+2. Scenario Definitions
+
+Create a new file:
+
+data/simulation_scenarios.json
+
+Define four scenarios:
+
+A. Hot Day Scenario
+- scenario_id: hot_day
+- name: Hot Day
+- description: Simulates excessive greenhouse temperature.
+- expected_result: high temperature alert and ventilation response.
+- generated reading:
+  - sensor_id: TEMP-001
+  - sensor_type: temperature
+  - value: above current max threshold
+  - unit: C
+
+B. Dry Soil Scenario
+- scenario_id: dry_soil
+- name: Dry Soil
+- description: Simulates low soil moisture.
+- expected_result: low soil moisture alert and irrigation response.
+- generated reading:
+  - sensor_id: SOIL-001
+  - sensor_type: soil_moisture
+  - value: below current min threshold
+  - unit: %
+
+C. High Humidity Scenario
+- scenario_id: high_humidity
+- name: High Humidity
+- description: Simulates excessive air humidity.
+- expected_result: high humidity alert and air circulation response.
+- generated reading:
+  - sensor_id: HUM-001
+  - sensor_type: humidity
+  - value: above current max threshold
+  - unit: %
+
+D. Low Light Scenario
+- scenario_id: low_light
+- name: Low Light
+- description: Simulates insufficient light intensity.
+- expected_result: low light alert and artificial lighting response.
+- generated reading:
+  - sensor_id: LIGHT-001
+  - sensor_type: light_intensity
+  - value: below current min threshold
+  - unit: lux
+
+Important:
+Do not hardcode values that may conflict with updated thresholds.
+The scenario service should read the current threshold_rules.json and generate values relative to the active thresholds.
+
+Examples:
+- Hot Day value = max_value + 5
+- Dry Soil value = min_value - 5
+- High Humidity value = max_value + 5
+- Low Light value = min_value - 5
+
+3. Scenario APIs
+
+Create:
+
+GET /api/simulation/scenarios
+
+Returns all available predefined scenarios.
+
+Create:
+
+POST /api/simulation/run/<scenario_id>
+
+Runs one selected scenario.
+
+Rules:
+- scenario_id must exist.
+- Generated readings must include valid sensor_id, sensor_type, value, unit, timestamp.
+- The generated readings must be processed through the same existing reading pipeline used by:
+  POST /api/sensors/<sensor_id>/reading
+- Scenario readings must be validated.
+- Scenario readings must be saved in readings.json if valid.
+- Alerts must be generated if thresholds are breached.
+- Critical alerts must trigger simulated automation.
+- Scenario results must be returned in the API response.
+
+Example response:
+
+{
+  "success": true,
+  "scenario_id": "dry_soil",
+  "scenario_name": "Dry Soil",
+  "message": "Simulation scenario completed successfully",
+  "generated_readings": [...],
+  "alerts": [...],
+  "automation_actions": [...],
+  "expected_result": "Low soil moisture alert and irrigation response"
+}
+
+4. Scenario Result Storage
+
+Scenario-generated data should be stored in the existing system files:
+- readings.json
+- alerts.json
+- automation_actions.json
+- system_logs.json
+
+Each scenario-generated reading should include:
+- source: "simulation_scenario"
+- scenario_id
+
+Each scenario-generated alert should include, if possible:
+- source: "simulation_scenario"
+- scenario_id
+
+Each scenario-generated automation action should include, if possible:
+- source: "simulation_scenario"
+- scenario_id
+
+5. Dashboard Update
+
+Update:
+- templates/index.html
+- static/css/style.css
+- static/js/dashboard.js
+
+Add a Simulation Scenarios section.
+
+Display buttons:
+- Run Hot Day Scenario
+- Run Dry Soil Scenario
+- Run High Humidity Scenario
+- Run Low Light Scenario
+
+When a scenario runs:
+- Call POST /api/simulation/run/<scenario_id>
+- Show scenario result summary:
+  - scenario name
+  - generated sensor reading
+  - created alert
+  - triggered automation response
+  - expected result
+- Refresh:
+  - latest sensor readings
+  - active alerts
+  - automation status
+  - analytics
+  - Greenhouse Health Score
+
+6. System Logs
+
+Create system log entries when:
+- a scenario starts
+- a scenario completes successfully
+- a scenario fails
+- an unknown scenario is requested
+
+Log fields:
+- log_id
+- event_type
+- description
+- scenario_id if available
+- created_at
+
+event_type examples:
+- simulation_scenario_started
+- simulation_scenario_completed
+- simulation_scenario_failed
+- unknown_simulation_scenario
+
+7. Security Requirements
+
+- Do not allow arbitrary custom scenario payloads in this prompt.
+- Only allow predefined scenario IDs.
+- Validate scenario_id on the backend.
+- Do not trust frontend-generated sensor values.
+- Backend must generate the scenario readings.
+- Scenario readings must still pass normal validation.
+- Do not expose stack traces or internal file paths.
+- Return safe error messages.
+
+8. QA Requirements
+
+After implementation, verify:
+
+1. Flask app runs successfully.
+2. Existing APIs from Prompts 1–8 still work.
+3. GET /api/simulation/scenarios returns exactly four scenarios.
+4. POST /api/simulation/run/hot_day generates high temperature reading.
+5. Hot Day scenario creates temperature alert.
+6. Hot Day scenario triggers ventilation automation.
+7. POST /api/simulation/run/dry_soil generates low soil moisture reading.
+8. Dry Soil scenario creates soil moisture alert.
+9. Dry Soil scenario triggers irrigation automation.
+10. POST /api/simulation/run/high_humidity generates high humidity reading.
+11. High Humidity scenario creates humidity alert.
+12. High Humidity scenario triggers air circulation automation.
+13. POST /api/simulation/run/low_light generates low light reading.
+14. Low Light scenario creates light alert.
+15. Low Light scenario triggers artificial lighting automation.
+16. Unknown scenario_id returns safe 404 or validation error.
+17. Scenario readings are saved in readings.json.
+18. Scenario alerts are saved in alerts.json.
+19. Scenario automation actions are saved in automation_actions.json.
+20. Scenario events are logged in system_logs.json.
+21. Dashboard scenario buttons work.
+22. Dashboard refreshes readings, alerts, automation, analytics, and health score after scenario run.
+23. Scenario readings do not bypass validation.
+24. Scenario readings use current threshold rules.
+
+Restrictions:
+- Do not implement full authentication yet.
+- Do not implement complete role-based permissions yet.
+- Do not implement custom user-created scenarios yet.
+- Do not use SQLite yet.
+- Keep JSON storage.
+- Do not rewrite the entire project.
+- Only extend the existing code.
+
+At the end of your response, provide:
+
+1. Summary of files created or modified.
+2. Available APIs after this prompt.
+3. Example scenario list response.
+4. Example Hot Day scenario response.
+5. Example invalid scenario response.
+6. QA checklist results.
+7. Requirements Coverage Status.
+
+Requirements Coverage Status:
+
+Total project requirements to track:
+- 48 Functional Requirements
+- 13 Non-Functional Requirements
+- Total: 61 requirements
+
+Requirements targeted in this prompt:
+
+Fully / mostly implemented:
+- FR-44: Run predefined simulation scenarios such as hot day, dry soil, high humidity, and low light.
+
+Partially strengthened:
+- FR-19 to FR-22: Scenario readings create sensor alerts through the real alert flow.
+- FR-27 to FR-30: Scenario critical alerts trigger automation responses.
+- FR-32: Dashboard now supports scenario-based updates.
+- FR-34: Active alerts refresh after scenarios.
+- FR-38: Greenhouse Health Score updates after scenarios.
+- FR-45: Greenhouse Manager scenario access is prepared, but full role permissions are not implemented yet.
+
+Covered so far:
+- Fully / mostly implemented: 57 / 61 requirements
+- Partially prepared: 3 / 61 requirements
+
+Still not fully covered:
+- 4 / 61 requirements
+
+Important:
+Do not mark full authentication, complete role-based permissions, final user access control, or full NFR validation as fully completed yet.

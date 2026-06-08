@@ -1,0 +1,279 @@
+You are continuing the implementation of the Smart Greenhouse IoT System.
+
+Act according to the following roles:
+1. Senior QA / Test Engineer
+2. System Architect
+3. Senior Backend Developer
+4. Product Manager
+5. Security Analyst
+
+Current Project Status:
+Prompt 1 created the project foundation.
+Prompt 2 implemented sensor reading ingestion, validation, storage, latest readings, reading history, rejected reading logs, and dashboard display.
+
+Goal of Prompt 3:
+Implement the Rule Engine and Threshold Evaluation layer.
+
+Main Flow for this prompt:
+Valid Sensor Reading → Threshold Rule Engine → Status Evaluation → Save Reading With Status → Dashboard Status Display
+
+Do NOT implement alerts yet.
+Do NOT implement automation yet.
+Do NOT implement authentication yet.
+Focus only on threshold evaluation and sensor status calculation.
+
+Main Requirements to Implement:
+
+1. Threshold Rule Structure
+
+Use data/threshold_rules.json as the source of threshold rules.
+
+Each rule should include:
+- rule_id
+- sensor_type
+- min_value
+- max_value
+- warning_margin
+- unit
+- severity_levels
+
+Supported sensor types:
+- temperature
+- humidity
+- soil_moisture
+- light_intensity
+
+Example structure:
+
+{
+  "rule_id": "RULE-TEMP-001",
+  "sensor_type": "temperature",
+  "min_value": 18,
+  "max_value": 30,
+  "warning_margin": 2,
+  "unit": "C",
+  "severity_levels": ["normal", "warning", "critical"]
+}
+
+2. Rule Engine Logic
+
+Implement rule_engine.py with clean functions:
+
+- get_threshold_rule(sensor_type)
+- evaluate_reading_status(sensor_type, value)
+- is_below_min(value, rule)
+- is_above_max(value, rule)
+- is_near_threshold(value, rule)
+- apply_threshold_evaluation(reading)
+
+Status logic:
+
+A reading is "critical" if:
+- value < min_value
+or
+- value > max_value
+
+A reading is "warning" if:
+- value is still inside the allowed range
+but close to min_value or max_value according to warning_margin
+
+A reading is "normal" if:
+- value is inside the allowed range
+and not close to the warning area
+
+Examples:
+- Temperature min=18, max=30, warning_margin=2
+- 24 → normal
+- 19 → warning
+- 29 → warning
+- 31 → critical
+- 15 → critical
+
+3. Update Reading Storage
+
+Modify the existing POST endpoint:
+
+POST /api/sensors/<sensor_id>/reading
+
+After validation passes:
+- Send the reading to the Rule Engine.
+- Add reading_status to the saved reading.
+- reading_status must now be one of:
+  - normal
+  - warning
+  - critical
+
+Do not save reading_status as "received" anymore.
+
+4. Latest Readings API Update
+
+Update:
+
+GET /api/readings/latest
+
+Each latest reading should include:
+- sensor_id
+- sensor_type
+- value
+- unit
+- timestamp
+- reading_status
+- threshold_min
+- threshold_max
+
+5. Sensor History API Update
+
+Update:
+
+GET /api/sensors/<sensor_id>/readings
+
+Each historical reading should include:
+- reading_id
+- sensor_id
+- sensor_type
+- value
+- unit
+- timestamp
+- reading_status
+
+History must be ordered newest to oldest.
+
+6. Dashboard Update
+
+Update index.html, style.css, and dashboard.js.
+
+Each sensor card should display:
+- Sensor name
+- Latest value
+- Unit
+- Last update time
+- Status: normal / warning / critical
+- Allowed range
+
+Visual behavior:
+- Normal readings should look neutral or positive.
+- Warning readings should be visually noticeable.
+- Critical readings should be strongly highlighted.
+
+Do not use complex UI libraries.
+Keep the dashboard simple, clean, and academic.
+
+7. Threshold Rules API
+
+Create:
+
+GET /api/thresholds
+
+Returns all threshold rules.
+
+Create:
+
+GET /api/thresholds/<sensor_type>
+
+Returns the threshold rule for a specific sensor type.
+
+Do NOT implement threshold editing yet.
+That will be done in a later prompt.
+
+8. System Logs
+
+If a valid reading cannot be evaluated because no threshold rule exists:
+- Do not save it as a valid reading.
+- Create a system log.
+- Return a safe error message.
+
+Log fields:
+- log_id
+- event_type
+- description
+- sensor_id
+- sensor_type
+- created_at
+
+event_type example:
+- missing_threshold_rule
+
+9. Security Requirements
+
+- Do not trust client-side status values.
+- The client must not send reading_status.
+- The backend must calculate reading_status only on the server.
+- Validate sensor type before threshold evaluation.
+- Do not expose stack traces.
+- Return safe error messages.
+
+10. QA Requirements
+
+After implementation, verify:
+
+1. Flask app runs successfully.
+2. Existing APIs from Prompt 1 and Prompt 2 still work.
+3. GET /api/thresholds returns four threshold rules.
+4. GET /api/thresholds/temperature returns the temperature rule.
+5. Valid normal reading is saved with reading_status = normal.
+6. Valid warning reading is saved with reading_status = warning.
+7. Valid critical reading is saved with reading_status = critical.
+8. Invalid readings are still rejected and logged.
+9. Rejected readings do not receive threshold evaluation.
+10. Latest readings API returns reading_status.
+11. Sensor history API returns reading_status.
+12. Dashboard displays normal/warning/critical correctly.
+13. Dashboard shows allowed threshold range.
+14. No alert records are created yet.
+15. No automation actions are created yet.
+
+Restrictions:
+- Do not implement alert generation.
+- Do not implement automation responses.
+- Do not implement threshold editing.
+- Do not implement user authentication.
+- Do not use SQLite yet.
+- Keep JSON storage.
+- Do not rewrite the entire project.
+- Only extend the existing code.
+
+At the end of your response, provide:
+
+1. Summary of files modified.
+2. Available APIs after this prompt.
+3. Example normal reading.
+4. Example warning reading.
+5. Example critical reading.
+6. QA checklist results.
+7. Requirements Coverage Status.
+
+Requirements Coverage Status:
+
+Total project requirements to track:
+- 48 Functional Requirements
+- 13 Non-Functional Requirements
+- Total: 61 requirements
+
+Requirements targeted in this prompt:
+
+Fully / mostly implemented:
+- FR-05: Sensor status as normal, warning, or critical
+- FR-14: Temperature threshold rule foundation
+- FR-15: Humidity threshold rule foundation
+- FR-16: Soil moisture threshold rule foundation
+- FR-17: Light intensity threshold rule foundation
+- FR-32: Dashboard displays latest readings with status
+- FR-33: Abnormal sensor readings visually highlighted
+- NFR-06: Clear display of sensor values, units, statuses, and update times
+- NFR-11: Validated readings are processed safely before system behavior
+
+Partially prepared:
+- FR-18: Threshold update support is prepared, but editing is not implemented yet.
+- FR-19 to FR-22: Alert conditions are detectable, but alerts are not generated yet.
+- FR-27 to FR-30: Automation trigger conditions are detectable, but automation is not implemented yet.
+- FR-35: Trend foundation exists through reading history, but trend visualization is not implemented yet.
+
+Covered so far:
+- Fully / mostly implemented: 19 / 61 requirements
+- Partially prepared: 10 / 61 requirements
+
+Still not fully covered:
+- 42 / 61 requirements
+
+Important:
+Do not mark alerts, automation, threshold editing, analytics, roles, or authentication as fully completed yet.

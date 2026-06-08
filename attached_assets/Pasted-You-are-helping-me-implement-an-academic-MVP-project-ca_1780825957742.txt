@@ -1,0 +1,203 @@
+You are helping me implement an academic MVP project called Smart Greenhouse IoT System.
+
+Act according to the following roles:
+1. Senior QA / Test Engineer
+2. System Architect
+3. Senior Backend Developer
+4. Product Manager
+5. Security Analyst
+
+Project Context:
+The system is an IoT-based smart greenhouse simulation. It uses four virtual sensors:
+- Temperature sensor
+- Air humidity sensor
+- Soil moisture sensor
+- Light intensity sensor
+
+The system must eventually support this main flow:
+Virtual Sensors → REST API → Validation Layer → Rule Engine → Alerts / Automation → Storage → Dashboard
+
+Technology Stack:
+- Replit
+- Python
+- Flask
+- REST APIs
+- HTML
+- CSS
+- JavaScript
+- JSON file storage for the MVP
+
+Important:
+This is Prompt 1. Do NOT implement the full system yet.
+Your goal is to create a clean, modular project foundation that can support all future requirements.
+
+Create the following project structure:
+
+/app.py
+/requirements.txt
+/README.md
+
+/templates/
+    index.html
+
+/static/
+    css/
+        style.css
+    js/
+        dashboard.js
+
+/data/
+    sensors.json
+    readings.json
+    alerts.json
+    automation_actions.json
+    system_logs.json
+    threshold_rules.json
+    users.json
+
+/services/
+    sensor_service.py
+    validation_service.py
+    rule_engine.py
+    alert_service.py
+    automation_service.py
+    storage_service.py
+    log_service.py
+    analytics_service.py
+
+/models/
+    sensor_model.py
+    reading_model.py
+    alert_model.py
+    actuator_model.py
+    threshold_rule_model.py
+    user_model.py
+    system_log_model.py
+
+Implementation Requirements for Prompt 1:
+
+1. Create a Flask application in app.py.
+2. Add a homepage route:
+   GET /
+   It should render templates/index.html.
+
+3. Add a basic health-check API:
+   GET /api/health
+   Response:
+   {
+     "status": "ok",
+     "message": "Smart Greenhouse IoT System is running"
+   }
+
+4. Add a basic sensors API:
+   GET /api/sensors
+   It should return the initial sensors from data/sensors.json.
+
+5. Initialize sensors.json with exactly four virtual sensors:
+   - TEMP-001, type: temperature, unit: C
+   - HUM-001, type: humidity, unit: %
+   - SOIL-001, type: soil_moisture, unit: %
+   - LIGHT-001, type: light_intensity, unit: lux
+
+6. Initialize threshold_rules.json with default min/max values for each sensor type.
+   Use reasonable placeholder values, but keep them easy to change later.
+
+7. Initialize the other JSON files as empty arrays:
+   - readings.json
+   - alerts.json
+   - automation_actions.json
+   - system_logs.json
+
+8. Initialize users.json with three demo users:
+   - Greenhouse Manager
+   - Farm Owner
+   - System Administrator
+   Each user should include:
+   user_id, full_name, email, role, account_status, created_at.
+   Do not store real passwords in this stage.
+
+9. Create a simple dashboard page in index.html.
+   It should show:
+   - Project title
+   - Four sensor cards placeholders
+   - Active alerts placeholder
+   - Automation status placeholder
+   - Greenhouse health placeholder
+
+10. Create basic CSS in static/css/style.css so the dashboard is clean and readable.
+
+11. Create dashboard.js with a simple fetch call to:
+   GET /api/sensors
+   Then display the four sensors on the dashboard.
+
+12. In the service files, create clean placeholder functions only.
+   Do not implement full validation, rule engine, alerts, automation, or analytics yet.
+   The goal is to prepare the architecture for future prompts.
+
+13. Add comments in the code explaining which future PRD area each service will support:
+   - sensor_service.py → Sensor Monitoring
+   - validation_service.py → Sensor Reading Validation
+   - rule_engine.py → Threshold Evaluation
+   - alert_service.py → Alerts and Notifications
+   - automation_service.py → Simulated Automation Responses
+   - storage_service.py → JSON Storage
+   - log_service.py → System Logs
+   - analytics_service.py → Dashboard Analytics and Health Score
+
+Security Requirements for Prompt 1:
+- Do not hardcode real passwords.
+- Do not expose sensitive data.
+- Validate that JSON files exist before reading.
+- Handle missing files safely.
+- Return safe error messages.
+
+QA Requirements for Prompt 1:
+After implementation, verify:
+1. The Flask app runs successfully.
+2. GET / works.
+3. GET /api/health returns status ok.
+4. GET /api/sensors returns exactly four sensors.
+5. The dashboard loads without console errors.
+6. The folder structure matches the requested architecture.
+7. JSON files are valid and readable.
+
+Restrictions:
+- Do not implement full sensor reading submission yet.
+- Do not implement alert generation yet.
+- Do not implement automation logic yet.
+- Do not implement authentication yet.
+- Do not use a database yet.
+- Do not remove or merge modules.
+- Keep the implementation simple, clean, and suitable for an academic MVP.
+
+At the end of your response, provide:
+1. A summary of files created.
+2. How to run the project in Replit.
+3. Which APIs are currently available.
+4. QA checklist results.
+5. Requirements Coverage Status.
+
+Requirements Coverage Status:
+Total project requirements to track:
+- 48 Functional Requirements
+- 13 Non-Functional Requirements
+- Total: 61 requirements
+
+For this prompt:
+Covered directly:
+- FR-01 to FR-04: partially prepared only, because the four sensor structures and dashboard placeholders are created.
+- FR-32: partially prepared only, because the main dashboard foundation is created.
+- NFR-08: partially covered, because the system is structured into separate modules.
+- NFR-12: partially prepared, because the architecture supports adding more virtual sensors later.
+
+Covered so far:
+0 fully implemented / 61 total requirements
+
+Partially prepared:
+6 / 61 requirements
+
+Still not fully covered:
+61 / 61 requirements
+
+Important:
+Do not mark any requirement as fully completed yet, because this prompt only creates the initial project foundation.

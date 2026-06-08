@@ -1,0 +1,46 @@
+[
+  {
+    "scenario_id": "hot_day",
+    "name": "Hot Day",
+    "description": "Simulates excessive greenhouse temperature.",
+    "expected_result": "High temperature alert and ventilation response.",
+    "sensor_id": "TEMP-001",
+    "sensor_type": "temperature",
+    "unit": "C",
+    "value_strategy": "above_max",
+    "offset": 5
+  },
+  {
+    "scenario_id": "dry_soil",
+    "name": "Dry Soil",
+    "description": "Simulates low soil moisture.",
+    "expected_result": "Low soil moisture alert and irrigation response.",
+    "sensor_id": "SOIL-001",
+    "sensor_type": "soil_moisture",
+    "unit": "%",
+    "value_strategy": "below_min",
+    "offset": 5
+  },
+  {
+    "scenario_id": "high_humidity",
+    "name": "High Humidity",
+    "description": "Simulates excessive air humidity.",
+    "expected_result": "High humidity alert and air circulation response.",
+    "sensor_id": "HUM-001",
+    "sensor_type": "humidity",
+    "unit": "%",
+    "value_strategy": "above_max",
+    "offset": 5
+  },
+  {
+    "scenario_id": "low_light",
+    "name": "Low Light",
+    "description": "Simulates insufficient light intensity.",
+    "expected_result": "Low light alert and artificial lighting response.",
+    "sensor_id": "LIGHT-001",
+    "sensor_type": "light_intensity",
+    "unit": "lux",
+    "value_strategy": "below_min",
+    "offset": 5
+  }
+]

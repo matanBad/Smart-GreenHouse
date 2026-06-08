@@ -1,0 +1,348 @@
+You are continuing the implementation of the Smart Greenhouse IoT System.
+
+Act according to the following roles:
+1. Senior QA / Test Engineer
+2. System Architect
+3. Senior Backend Developer
+4. Product Manager
+5. Security Analyst
+
+Current Project Status:
+Prompt 1 created the project foundation.
+Prompt 2 implemented sensor reading ingestion, validation, storage, latest readings, reading history, rejected reading logs, and dashboard display.
+Prompt 3 implemented Rule Engine and threshold evaluation.
+Prompt 4 implemented alerts, recommended actions, active alerts, alert history, and alert resolution.
+Prompt 5 implemented simulated automation responses, actuators, automation history, and actuator reset.
+Prompt 6 implemented threshold management with demo administrator role protection.
+Prompt 7 implemented sensor management, sensor activity monitoring, stale-data detection, and sensor-related logs.
+
+Goal of Prompt 8:
+Implement Dashboard Analytics and Greenhouse Health Score.
+
+Main Flow for this prompt:
+Valid Readings + Active Alerts + Alert History + Automation History + Sensor Statuses
+→ Analytics Service
+→ Greenhouse Health Status
+→ Greenhouse Health Score
+→ Dashboard Summary
+
+Do NOT implement full authentication yet.
+Do NOT implement simulation scenarios yet.
+Do NOT use machine learning.
+Keep analytics simple and suitable for the academic MVP.
+
+Main Requirements to Implement:
+
+1. Analytics Service
+
+Update services/analytics_service.py.
+
+Implement clean functions:
+
+- get_average_value_by_sensor_type(sensor_type)
+- get_average_values_for_all_sensors()
+- count_alerts_by_sensor_type()
+- get_most_frequent_abnormal_condition()
+- get_recent_trend_by_sensor_type(sensor_type)
+- get_recent_trends_for_all_sensors()
+- calculate_greenhouse_health_status()
+- calculate_greenhouse_health_score()
+- get_dashboard_analytics_summary()
+
+Use only valid readings from readings.json.
+Do not include rejected readings.
+Do not include invalid logs in analytics calculations.
+
+2. Average Sensor Values
+
+Calculate average values for:
+- temperature
+- humidity
+- soil_moisture
+- light_intensity
+
+Rules:
+- Use valid readings only.
+- If no readings exist for a sensor type, return:
+  average: null
+  message: "No valid readings available"
+
+3. Alert Counts by Sensor Type
+
+Calculate number of alerts for each sensor type:
+- temperature
+- humidity
+- soil_moisture
+- light_intensity
+
+Use alerts.json.
+
+Return both:
+- total alerts per sensor type
+- active alerts per sensor type
+
+4. Most Frequent Abnormal Condition
+
+Identify the most frequent alert_type from alerts.json.
+
+Example output:
+
+{
+  "alert_type": "soil_moisture_too_low",
+  "count": 4
+}
+
+If no alerts exist, return:
+
+{
+  "alert_type": null,
+  "count": 0,
+  "message": "No abnormal conditions detected yet"
+}
+
+5. Recent Sensor Trends
+
+For each sensor type, calculate a simple trend based on the latest valid readings.
+
+Use the latest 3 to 5 readings per sensor type.
+
+Trend values:
+- increasing
+- decreasing
+- stable
+- insufficient_data
+
+Simple rule:
+- If latest value > oldest value → increasing
+- If latest value < oldest value → decreasing
+- If equal or almost equal → stable
+- If fewer than 2 readings → insufficient_data
+
+6. Greenhouse Health Status
+
+Implement general health status values:
+
+- healthy
+- needs_attention
+- critical
+
+Suggested logic:
+- If any current sensor status is critical OR any active critical alert exists:
+  health_status = critical
+- Else if any current sensor status is warning OR any active warning alert exists OR any sensor communication_status is inactive:
+  health_status = needs_attention
+- Else:
+  health_status = healthy
+
+Return also a short explanation.
+
+Examples:
+- "Greenhouse is healthy because all current readings are normal."
+- "Greenhouse needs attention because at least one sensor is in warning state."
+- "Greenhouse is critical because at least one active critical alert exists."
+
+7. Greenhouse Health Score
+
+Implement a simple score from 0 to 100.
+
+Suggested formula:
+Start from 100.
+
+Subtract:
+- 10 points for each warning sensor status.
+- 25 points for each critical sensor status.
+- 10 points for each active warning alert.
+- 25 points for each active critical alert.
+- 10 points for each inactive sensor.
+- 5 points for each no_data sensor.
+
+Clamp score:
+- minimum 0
+- maximum 100
+
+Add interpretation:
+- 80–100: good
+- 50–79: moderate
+- 0–49: poor
+
+Important:
+Use only current valid sensor states, active alerts, and sensor communication statuses.
+Invalid readings must not affect the score.
+
+8. Analytics APIs
+
+Create:
+
+GET /api/analytics/summary
+
+Returns:
+- average_values
+- alert_counts_by_sensor_type
+- most_frequent_abnormal_condition
+- recent_trends
+- greenhouse_health_status
+- greenhouse_health_score
+
+Create:
+
+GET /api/analytics/health
+
+Returns:
+- health_status
+- explanation
+- score
+- interpretation
+
+Create:
+
+GET /api/analytics/trends
+
+Returns:
+- recent trend for each sensor type
+
+9. Dashboard Update
+
+Update index.html, style.css, and dashboard.js.
+
+Add Dashboard Analytics section.
+
+Display:
+- Average temperature
+- Average humidity
+- Average soil moisture
+- Average light intensity
+- Number of alerts per sensor type
+- Most frequent abnormal condition
+- Recent trend for each sensor type
+- Greenhouse Health Status
+- Greenhouse Health Score
+- Score interpretation: good / moderate / poor
+
+Add button:
+"Refresh Analytics"
+
+It should call:
+
+GET /api/analytics/summary
+
+10. Farm Owner Summary View Foundation
+
+Add a simple high-level summary section for Farm Owner.
+
+It should focus only on:
+- Greenhouse Health Status
+- Greenhouse Health Score
+- Basic analytics summary
+- Most frequent abnormal condition
+
+Do not implement real login or role switching yet.
+Just prepare the UI section.
+
+11. System Logs
+
+Create system log entries when:
+- analytics summary is generated
+- greenhouse health score is calculated
+- analytics calculation fails safely
+
+Log fields:
+- log_id
+- event_type
+- description
+- created_at
+
+event_type examples:
+- analytics_summary_generated
+- health_score_calculated
+- analytics_calculation_failed
+
+12. Security Requirements
+
+- Do not include rejected readings in analytics.
+- Do not expose internal file paths.
+- Do not expose stack traces.
+- Return safe error messages.
+- Treat analytics as read-only APIs.
+- Do not allow client-side score calculation to replace backend calculation.
+- The backend must calculate health status and score.
+
+13. QA Requirements
+
+After implementation, verify:
+
+1. Flask app runs successfully.
+2. Existing APIs from Prompts 1–7 still work.
+3. GET /api/analytics/summary returns all analytics fields.
+4. GET /api/analytics/health returns health status, explanation, score, and interpretation.
+5. GET /api/analytics/trends returns trends for all four sensor types.
+6. Average values are calculated from valid readings only.
+7. Rejected readings do not affect averages.
+8. Alert counts are calculated correctly per sensor type.
+9. Most frequent abnormal condition is calculated correctly.
+10. Trend is increasing when latest value is higher than oldest value.
+11. Trend is decreasing when latest value is lower than oldest value.
+12. Trend is stable when values are equal or almost equal.
+13. Trend returns insufficient_data when fewer than two readings exist.
+14. Health status becomes critical when active critical alert exists.
+15. Health status becomes needs_attention when active warning alert exists.
+16. Health status becomes needs_attention when a sensor is inactive.
+17. Health status becomes healthy when all current statuses are normal and sensors are active.
+18. Health score never goes below 0.
+19. Health score never goes above 100.
+20. Dashboard displays analytics correctly.
+21. Dashboard displays Greenhouse Health Score correctly.
+22. Farm Owner summary section displays high-level data only.
+23. Analytics events are logged safely.
+
+Restrictions:
+- Do not implement machine learning.
+- Do not implement prediction.
+- Do not implement full authentication yet.
+- Do not implement complete role-based permissions yet.
+- Do not implement simulation scenarios yet.
+- Do not use SQLite yet.
+- Keep JSON storage.
+- Do not rewrite the entire project.
+- Only extend the existing code.
+
+At the end of your response, provide:
+
+1. Summary of files created or modified.
+2. Available APIs after this prompt.
+3. Example analytics summary response.
+4. Example health score response.
+5. QA checklist results.
+6. Requirements Coverage Status.
+
+Requirements Coverage Status:
+
+Total project requirements to track:
+- 48 Functional Requirements
+- 13 Non-Functional Requirements
+- Total: 61 requirements
+
+Requirements targeted in this prompt:
+
+Fully / mostly implemented:
+- FR-35: Recent sensor trends
+- FR-36: General greenhouse health status
+- FR-37: Basic greenhouse analytics
+- FR-38: Greenhouse Health Score
+- FR-46: Farm Owner high-level dashboard foundation
+
+Partially strengthened:
+- FR-32: Main dashboard now includes analytics and health summary
+- FR-34: Active alerts now contribute to dashboard health state
+- FR-40: Automation history can support dashboard analytics
+- NFR-06: Dashboard clarity is strengthened
+- NFR-08: Analytics is implemented in a separate service module
+
+Covered so far:
+- Fully / mostly implemented: 56 / 61 requirements
+- Partially prepared: 4 / 61 requirements
+
+Still not fully covered:
+- 5 / 61 requirements
+
+Important:
+Do not mark simulation scenarios, full user access, complete role-based permissions, authentication, or final NFR validation as fully completed yet.

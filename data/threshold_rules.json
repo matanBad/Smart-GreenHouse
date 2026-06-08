@@ -1,0 +1,54 @@
+[
+  {
+    "rule_id": "RULE-TEMP-001",
+    "sensor_type": "temperature",
+    "min_value": 18,
+    "max_value": 30,
+    "warning_margin": 2,
+    "unit": "C",
+    "severity_levels": [
+      "normal",
+      "warning",
+      "critical"
+    ]
+  },
+  {
+    "rule_id": "RULE-HUM-001",
+    "sensor_type": "humidity",
+    "min_value": 40,
+    "max_value": 70,
+    "warning_margin": 5,
+    "unit": "%",
+    "severity_levels": [
+      "normal",
+      "warning",
+      "critical"
+    ]
+  },
+  {
+    "rule_id": "RULE-SOIL-001",
+    "sensor_type": "soil_moisture",
+    "min_value": 30,
+    "max_value": 60,
+    "warning_margin": 5,
+    "unit": "%",
+    "severity_levels": [
+      "normal",
+      "warning",
+      "critical"
+    ]
+  },
+  {
+    "rule_id": "RULE-LIGHT-001",
+    "sensor_type": "light_intensity",
+    "min_value": 2000,
+    "max_value": 10000,
+    "warning_margin": 1000,
+    "unit": "lux",
+    "severity_levels": [
+      "normal",
+      "warning",
+      "critical"
+    ]
+  }
+]

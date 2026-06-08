@@ -1,0 +1,1 @@
+- [Greenhouse prompt conventions](greenhouse-prompt-conventions.md) — durable scope/security/design decisions for the multi-prompt Greenhouse MVP (rule engine, server-derived state, admin edits, analytics, simulation scenarios, header-based RBAC).
