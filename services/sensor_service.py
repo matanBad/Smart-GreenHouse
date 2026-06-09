@@ -14,6 +14,7 @@ Note: this service assumes readings have already been validated by
 """
 
 import uuid
+import math
 from datetime import datetime, timezone
 
 from models.reading_model import make_reading
@@ -277,6 +278,18 @@ def save_reading(
     `scenario_id` mark provenance (set for simulation-scenario readings, else
     None). Returns the record.
     """
+    # Ensure numeric readings are stored with a consistent precision: always
+    # round *up* (ceiling) to 2 decimal places so values are comparable and the
+    # UI displays a predictable number of decimals. Non-numeric values are left
+    # unchanged and will be handled by the caller/validation.
+    try:
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            # ceil to 2 decimals
+            value = float(math.ceil(float(value) * 100.0) / 100.0)
+    except Exception:
+        # If rounding fails for any reason, fall back to original value.
+        pass
+
     reading = make_reading(
         reading_id=_new_reading_id(),
         sensor_id=sensor_id,
@@ -322,7 +335,12 @@ def get_latest_readings():
     for sensor in get_all_sensors():
         sensor_id = sensor.get("sensor_id")
         sensor_type = sensor.get("sensor_type")
-        latest = get_latest_reading_for_sensor(sensor_id)
+        # Pull the full reading history for this sensor once so we can
+        # determine both the absolute latest reading and the latest manual
+        # (non-automation) reading.
+        sensor_readings = get_readings_for_sensor(sensor_id)
+        latest = sensor_readings[0] if sensor_readings else None
+        latest_manual = next((r for r in sensor_readings if r.get("source") != "automation"), None)
         rule = get_threshold_rule(sensor_type)
         result.append(
             {
@@ -336,7 +354,13 @@ def get_latest_readings():
                 "threshold_min": rule.get("min_value") if rule else None,
                 "threshold_max": rule.get("max_value") if rule else None,
                 "has_reading": latest is not None,
+                # `latest_reading` is the most recent stored reading (may be an
+                # automation-originated corrective reading). Also expose
+                # `latest_manual_reading` which prefers a reading whose source is
+                # not "automation" so the UI can show the human/device-origin
+                # value that triggered alerts when desired.
                 "latest_reading": latest,
+                "latest_manual_reading": latest_manual,
             }
         )
     return result

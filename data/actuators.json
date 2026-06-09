@@ -3,10 +3,10 @@
     "actuator_id": "ACT-VENT-001",
     "actuator_type": "ventilation",
     "actuator_name": "Ventilation Fan",
-    "status": "active",
+    "status": "inactive",
     "greenhouse_id": "GH-001",
-    "last_activation_time": "2026-06-07T12:25:37.234950+00:00",
-    "last_trigger_reason": "Greenhouse Temperature Sensor reading 35C exceeded the maximum threshold of 30C."
+    "last_activation_time": "2026-06-09T06:34:18.588983+00:00",
+    "last_trigger_reason": "automation completed"
   },
   {
     "actuator_id": "ACT-IRR-001",
@@ -14,8 +14,8 @@
     "actuator_name": "Irrigation System",
     "status": "inactive",
     "greenhouse_id": "GH-001",
-    "last_activation_time": "2026-06-07T11:50:12.216502+00:00",
-    "last_trigger_reason": "Soil Moisture Sensor reading 25% dropped below the minimum threshold of 30%."
+    "last_activation_time": "2026-06-09T06:35:04.641368+00:00",
+    "last_trigger_reason": "automation completed"
   },
   {
     "actuator_id": "ACT-LIGHT-001",
@@ -23,8 +23,8 @@
     "actuator_name": "Artificial Lighting",
     "status": "inactive",
     "greenhouse_id": "GH-001",
-    "last_activation_time": "2026-06-07T11:50:12.487804+00:00",
-    "last_trigger_reason": "Light Intensity Sensor reading 1995lux dropped below the minimum threshold of 2000lux."
+    "last_activation_time": "2026-06-08T16:30:59.922299+00:00",
+    "last_trigger_reason": "manual reset"
   },
   {
     "actuator_id": "ACT-AIR-001",
@@ -32,7 +32,7 @@
     "actuator_name": "Air Circulation Fan",
     "status": "inactive",
     "greenhouse_id": "GH-001",
-    "last_activation_time": "2026-06-07T11:50:12.357745+00:00",
-    "last_trigger_reason": "Air Humidity Sensor reading 75% exceeded the maximum threshold of 70%."
+    "last_activation_time": "2026-06-08T17:01:03.146229+00:00",
+    "last_trigger_reason": "automation completed"
   }
 ]

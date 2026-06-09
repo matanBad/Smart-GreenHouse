@@ -13,7 +13,7 @@ import uuid
 from datetime import datetime, timezone
 
 from models.system_log_model import make_log
-from services.storage_service import append_json, read_json
+from services.storage_service import append_json, read_json, write_json
 
 
 def _now_iso():
@@ -352,3 +352,13 @@ def get_logs():
     """Return all system log entries, newest first."""
     logs = read_json("system_logs.json", default=[])
     return list(reversed(logs))
+
+
+def clear_logs():
+    """Clear all system logs (overwrite with an empty list).
+
+    Returns True on success.
+    """
+    write_json("system_logs.json", [])
+    return True
+

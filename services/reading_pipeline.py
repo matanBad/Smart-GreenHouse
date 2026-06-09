@@ -128,6 +128,33 @@ def process_reading(sensor_id, payload, source=None, scenario_id=None):
     except Exception:
         pass
 
+    # If this reading moved the sensor back into the normal range, resolve any
+    # active alerts for the sensor and deactivate related automation actions so
+    # automated responses stop once the condition is fixed.
+    try:
+        # If the new reading is not critical (warning or normal) consider active
+        # critical alerts resolved for this sensor and stop related automation.
+        if evaluation["status"] is not None and evaluation["status"] != "critical":
+            # Lazy imports to avoid circular dependencies
+            from services.alert_service import get_alerts_for_sensor, resolve_alert
+            from services.automation_service import deactivate_actions_for_sensor
+
+            alerts = get_alerts_for_sensor(sensor_id)
+            for a in alerts:
+                if a.get("status") == "active":
+                    try:
+                        resolve_alert(a.get("alert_id"))
+                    except Exception:
+                        pass
+
+            try:
+                deactivate_actions_for_sensor(sensor_id)
+            except Exception:
+                pass
+    except Exception:
+        # Best-effort only; never allow alert cleanup to break ingestion.
+        pass
+
     # 5) Warning/critical readings raise an alert (severity from the rule engine,
     #    never from input). The alert inherits the reading's provenance.
     alert = None

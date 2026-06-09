@@ -64,6 +64,7 @@ from services.automation_service import (
     get_all_actuators,
     reset_actuator_status,
     trigger_automation_for_alert,
+    clear_actions,
 )
 from services.analytics_service import (
     get_dashboard_analytics_summary,
@@ -116,6 +117,11 @@ from services.simulation_service import (
     get_scenario_by_id,
     run_simulation_scenario,
 )
+from services.live_simulation import (
+    start_live_simulation,
+    stop_live_simulation,
+    get_live_simulation_status,
+)
 from services.log_service import (
     log_simulation_scenario_started,
     log_simulation_scenario_completed,
@@ -126,6 +132,7 @@ from services.log_service import (
     get_logs,
     log_invalid_role_attempt,
     log_unauthorized_access_attempt,
+    clear_logs,
 )
 from services.access_control_service import (
     get_role_from_request,
@@ -618,6 +625,20 @@ def automation_actions():
         return jsonify({"error": "Unable to load automation actions."}), 500
 
 
+@app.route("/api/automation/actions/clear", methods=["POST"])
+@permission_required("update_thresholds")
+def clear_automation_actions_endpoint():
+    """Clear automation actions history (admin-only)."""
+    try:
+        clear_actions()
+    except Exception:
+        return (
+            jsonify({"success": False, "message": "Unable to clear automation actions"}),
+            500,
+        )
+    return jsonify({"success": True, "message": "Automation actions cleared"}), 200
+
+
 @app.route("/api/automation/active")
 @permission_required("view_automation_status", "reset_actuators")
 def automation_active():
@@ -789,6 +810,42 @@ def run_scenario(scenario_id):
     return jsonify(result), 200
 
 
+@app.route("/api/simulation/live/start", methods=["POST"])
+@permission_required("update_thresholds")
+def start_live():
+    payload = request.get_json(silent=True) or {}
+    interval = payload.get("interval_seconds", 5)
+    try:
+        started = start_live_simulation(interval_seconds=interval)
+    except Exception:
+        return jsonify({"success": False, "message": "Unable to start live simulation"}), 500
+    if not started:
+        return jsonify({"success": False, "message": "Live simulation already running"}), 409
+    return jsonify({"success": True, "message": "Live simulation started", "interval_seconds": interval}), 200
+
+
+@app.route("/api/simulation/live/stop", methods=["POST"])
+@permission_required("update_thresholds")
+def stop_live():
+    try:
+        stopped = stop_live_simulation()
+    except Exception:
+        return jsonify({"success": False, "message": "Unable to stop live simulation"}), 500
+    if not stopped:
+        return jsonify({"success": False, "message": "Live simulation was not running"}), 409
+    return jsonify({"success": True, "message": "Live simulation stopped"}), 200
+
+
+@app.route("/api/simulation/live/status")
+@permission_required("update_thresholds")
+def live_status():
+    try:
+        status = get_live_simulation_status()
+    except Exception:
+        return jsonify({"success": False, "message": "Unable to determine live simulation status"}), 500
+    return jsonify({"success": True, "status": status}), 200
+
+
 @app.route("/api/logs")
 @permission_required("view_system_logs")
 def system_logs():
@@ -806,6 +863,20 @@ def system_logs():
             jsonify({"success": False, "message": "Unable to load system logs"}),
             500,
         )
+
+
+@app.route("/api/logs/clear", methods=["POST"])
+@permission_required("update_thresholds")
+def clear_system_logs():
+    """Clear the system logs (admin-only)."""
+    try:
+        clear_logs()
+    except Exception:
+        return (
+            jsonify({"success": False, "message": "Unable to clear system logs"}),
+            500,
+        )
+    return jsonify({"success": True, "message": "System logs cleared"}), 200
 
 
 if __name__ == "__main__":

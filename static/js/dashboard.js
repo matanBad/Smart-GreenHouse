@@ -103,17 +103,23 @@ function renderSensors(entries) {
   }
 
   entries.forEach((entry) => {
-    const reading = entry.latest_reading;
-    const hasReading = entry.has_reading && reading;
-    const status = hasReading ? reading.reading_status : null;
+    // Show only the absolute latest reading (current). Do not display the
+    // separate "Measured" / manual value — only the current stored reading is
+    // shown to avoid confusion when automation later adjusts the value.
+    const current = entry.latest_reading || null;
+    const hasReading = entry.has_reading && current;
+    const status = current ? current.reading_status : null;
 
-    const valueBlock = hasReading
-      ? `<span class="value">${reading.value}</span>
-         <span class="unit">${entry.unit ?? ""}</span>`
-      : `<span class="no-reading">No reading received yet</span>`;
+    let valueBlock = `<span class="no-reading">No reading received yet</span>`;
+    if (hasReading) {
+      const currentPart = current
+        ? `<div class="reading-row"><strong>Current:</strong> <span class="value">${current.value}</span> <span class="unit">${entry.unit ?? ""}</span> <small class="muted">(source: ${current.source || 'device'})</small></div>`
+        : "";
+      valueBlock = currentPart;
+    }
 
     const lastUpdate = hasReading
-      ? formatTime(reading.timestamp || reading.created_at)
+      ? formatTime(current && (current.timestamp || current.created_at))
       : "—";
 
     const statusBlock = hasReading
@@ -457,6 +463,84 @@ async function loadLatest() {
   }
 }
 
+// ---- Live simulation controls (admin-only) -------------------------------
+async function getLiveSimulationStatus() {
+  try {
+    const res = await apiFetch(apiUrl("/api/simulation/live/status"));
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.status || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function startLiveSimulation(intervalSeconds) {
+  const payload = { interval_seconds: Number(intervalSeconds || 5) };
+  const res = await apiFetch(apiUrl("/api/simulation/live/start"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return res;
+}
+
+async function stopLiveSimulation() {
+  const res = await apiFetch(apiUrl("/api/simulation/live/stop"), { method: "POST" });
+  return res;
+}
+
+async function toggleLiveSimulation(btn) {
+  if (!btn) return;
+  btn.disabled = true;
+  try {
+    const status = await getLiveSimulationStatus();
+    if (status && status.running) {
+      // Stop
+      const res = await stopLiveSimulation();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.warn("Failed to stop live simulation:", data);
+      }
+    } else {
+      // Start with selected interval
+      const sel = document.getElementById("live-sim-interval");
+      const interval = sel ? Number(sel.value) || 5 : 5;
+      const res = await startLiveSimulation(interval);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.warn("Failed to start live simulation:", data);
+        if (res.status === 403) {
+          alert("You are not authorized to start the live simulation. Admin role required.");
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Live simulation toggle failed:", err);
+  } finally {
+    await updateLiveSimulationButton(btn);
+    // Refresh readings so the UI reflects potential new data quickly
+    await loadLatest();
+    btn.disabled = false;
+  }
+}
+
+async function updateLiveSimulationButton(btn) {
+  if (!btn) return;
+  try {
+    const status = await getLiveSimulationStatus();
+    if (status && status.running) {
+      btn.textContent = `Stop Live Demo (${status.interval_seconds}s)`;
+      btn.classList.add("btn-danger");
+    } else {
+      btn.textContent = "Start Live Demo";
+      btn.classList.remove("btn-danger");
+    }
+  } catch (err) {
+    // ignore
+  }
+}
+
 // ---- Sensor management (Prompt 7) ----------------------------------------
 
 function commStatusLabel(status) {
@@ -592,10 +676,39 @@ async function sendDemoReading(sensorId) {
   const cfg = DEMO_SENSORS[sensorId];
   if (!cfg) return;
 
+  // Fetch the current threshold rule for this sensor type if available so the
+  // demo generator always spans beyond the live thresholds (prevents a stale
+  // hardcoded demo range from accidentally being entirely inside the allowed
+  // range after an admin edit).
+  let demoMin = cfg.min;
+  let demoMax = cfg.max;
+  try {
+    // Use the latest readings endpoint (permission: view_current_readings)
+    // which is available to the default greenhouse_manager role, rather than
+    // the admin-only /api/thresholds endpoint. This lets demo buttons always
+    // extend beyond the live thresholds visible to the dashboard.
+    const res = await apiFetch(apiUrl(`/api/readings/latest`));
+    if (res.ok) {
+      const entries = await res.json();
+      const entry = (entries || []).find((e) => e.sensor_id === sensorId);
+      if (entry) {
+        const thMin = Number(entry.threshold_min);
+        const thMax = Number(entry.threshold_max);
+        if (!isNaN(thMin) && !isNaN(thMax)) {
+          const off = Math.max((thMax - thMin) * 0.1, 2); // 10% or at least 2 units
+          demoMin = Math.min(demoMin, thMin - off);
+          demoMax = Math.max(demoMax, thMax + off);
+        }
+      }
+    }
+  } catch (err) {
+    // Best-effort: fall back to the static demo range if the fetch fails.
+  }
+
   const payload = {
     sensor_id: sensorId,
     sensor_type: cfg.type,
-    value: randomInRange(cfg.min, cfg.max),
+    value: randomInRange(demoMin, demoMax),
     unit: cfg.unit,
     timestamp: new Date().toISOString(),
   };
@@ -1034,14 +1147,98 @@ function wireControls() {
     withButtonFeedback(refreshAutomationBtn, () => loadAutomation()),
   );
 
+  // Clear automation history (admin only)
+  const clearAutomationBtn = document.getElementById("clear-automation-btn");
+  if (clearAutomationBtn) {
+    clearAutomationBtn.addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to clear the automation history? This cannot be undone.")) return;
+      clearAutomationBtn.disabled = true;
+      try {
+        const res = await apiFetch(apiUrl("/api/automation/actions/clear"), { method: "POST" });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          console.warn("Failed to clear automation history:", data);
+          alert(data.message || "Failed to clear automation history");
+        }
+      } catch (err) {
+        console.warn("Failed to clear automation history:", err);
+        alert("Failed to clear automation history");
+      } finally {
+        clearAutomationBtn.disabled = false;
+        // Refresh the automation view
+        await loadAutomation();
+      }
+    });
+  }
+
   const checkActivityBtn = document.getElementById("check-activity-btn");
   if (checkActivityBtn) {
     checkActivityBtn.addEventListener("click", () => checkSensorActivity());
   }
 
+  // Clear system logs (admin only)
+  const clearLogsBtn = document.getElementById("clear-logs-btn");
+  if (clearLogsBtn) {
+    clearLogsBtn.addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to clear the system logs? This cannot be undone.")) return;
+      clearLogsBtn.disabled = true;
+      try {
+        const res = await apiFetch(apiUrl("/api/logs/clear"), { method: "POST" });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          console.warn("Failed to clear system logs:", data);
+          alert(data.message || "Failed to clear system logs");
+        }
+      } catch (err) {
+        console.warn("Failed to clear system logs:", err);
+        alert("Failed to clear system logs");
+      } finally {
+        clearLogsBtn.disabled = false;
+        await loadLogs();
+      }
+    });
+  }
+
   document.querySelectorAll(".demo-buttons [data-sensor]").forEach((btn) => {
     btn.addEventListener("click", () => sendDemoReading(btn.dataset.sensor));
   });
+
+  const liveSimBtn = document.getElementById("live-sim-btn");
+  if (liveSimBtn) {
+    liveSimBtn.addEventListener("click", () => toggleLiveSimulation(liveSimBtn));
+    // Query initial status and update label
+    updateLiveSimulationButton(liveSimBtn).catch(() => {});
+  }
+
+  // Start automatic refreshing of the dashboard so sensors update without the
+  // user having to click the Refresh button. Default interval is 5 seconds.
+  // The auto-refresh calls `loadForRole()` which loads only the data the
+  // current role is allowed to see.
+  try {
+    startAutoRefresh();
+  } catch (err) {
+    console.warn('Failed to start auto-refresh:', err);
+  }
+}
+
+// Auto-refresh helpers
+let _autoRefreshTimer = null;
+let AUTO_REFRESH_SECONDS = 5;
+
+function startAutoRefresh(intervalSeconds) {
+  stopAutoRefresh();
+  const sec = Number(intervalSeconds) || AUTO_REFRESH_SECONDS;
+  _autoRefreshTimer = setInterval(() => {
+    // Use loadForRole so we only request endpoints permitted for the active role
+    loadForRole();
+  }, sec * 1000);
+}
+
+function stopAutoRefresh() {
+  if (_autoRefreshTimer) {
+    clearInterval(_autoRefreshTimer);
+    _autoRefreshTimer = null;
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -52,6 +52,21 @@
             Generate Light Reading
           </button>
         </div>
+        <div class="live-sim-controls" data-roles="system_administrator" style="display:inline-block;margin-left:12px">
+          <label style="display:inline-block;margin-left:8px">
+            Interval:
+            <select id="live-sim-interval" style="margin-left:6px">
+              <option value="1">1s</option>
+              <option value="2">2s</option>
+              <option value="5" selected>5s</option>
+              <option value="10">10s</option>
+            </select>
+          </label>
+          <button id="live-sim-btn" class="btn btn-primary">
+            Start Live Demo
+          </button>
+        </div>
+        </div>
       </section>
 
       <!-- Live sensors -->
@@ -110,7 +125,14 @@
 
       <!-- Automation history -->
       <section data-roles="greenhouse_manager system_administrator">
-        <h2 class="section-title">Automation History</h2>
+        <div class="alerts-head">
+          <h2 class="section-title">Automation History</h2>
+          <div class="head-actions">
+            <button id="clear-automation-btn" class="btn btn-danger" data-roles="system_administrator">
+              Clear Automation History
+            </button>
+          </div>
+        </div>
         <div id="automation-history" class="automation-history">
           <p class="loading">Loading automation history…</p>
         </div>
@@ -185,9 +207,14 @@
       <section data-roles="system_administrator">
         <div class="alerts-head">
           <h2 class="section-title">System Logs</h2>
-          <button id="refresh-logs-btn" class="btn btn-ghost">
-            Refresh Logs
-          </button>
+          <div class="head-actions">
+            <button id="refresh-logs-btn" class="btn btn-ghost">
+              Refresh Logs
+            </button>
+            <button id="clear-logs-btn" class="btn btn-danger" data-roles="system_administrator">
+              Clear System Logs
+            </button>
+          </div>
         </div>
         <p class="section-note">
           The audit trail recorded by the backend — rejected readings,

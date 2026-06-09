@@ -8,7 +8,7 @@
     "location": "Zone A",
     "status": "enabled",
     "expected_frequency_seconds": 5,
-    "last_valid_reading_at": "2026-06-08T09:23:44.408153+00:00",
+    "last_valid_reading_at": "2026-06-09T06:36:00.588414+00:00",
     "communication_status": "active",
     "created_at": "2026-06-07T00:00:00+00:00",
     "updated_at": "2026-06-07T00:00:00+00:00"
@@ -22,7 +22,7 @@
     "location": "Zone A",
     "status": "enabled",
     "expected_frequency_seconds": 5,
-    "last_valid_reading_at": "2026-06-07T12:25:21.005021+00:00",
+    "last_valid_reading_at": "2026-06-09T06:36:03.192615+00:00",
     "communication_status": "active",
     "created_at": "2026-06-07T00:00:00+00:00",
     "updated_at": "2026-06-07T00:00:00+00:00"
@@ -36,7 +36,7 @@
     "location": "Bed 1",
     "status": "enabled",
     "expected_frequency_seconds": 10,
-    "last_valid_reading_at": "2026-06-07T12:25:21.560229+00:00",
+    "last_valid_reading_at": "2026-06-09T06:36:05.733001+00:00",
     "communication_status": "active",
     "created_at": "2026-06-07T00:00:00+00:00",
     "updated_at": "2026-06-07T00:00:00+00:00"
@@ -50,7 +50,7 @@
     "location": "Zone A",
     "status": "enabled",
     "expected_frequency_seconds": 5,
-    "last_valid_reading_at": "2026-06-07T12:25:22.339993+00:00",
+    "last_valid_reading_at": "2026-06-09T06:36:08.287806+00:00",
     "communication_status": "active",
     "created_at": "2026-06-07T00:00:00+00:00",
     "updated_at": "2026-06-07T00:00:00+00:00"
